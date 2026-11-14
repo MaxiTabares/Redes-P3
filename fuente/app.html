@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador · Parcial 3 · Redes de Datos</title>
+<meta name="description" content="Cuestionario interactivo para practicar el tercer parcial de Redes de Datos (4K4).">
+<meta name="theme-color" content="#C8102E">
+<style>
+:root{
+  --rojo:#C8102E; --rojo-osc:#9E0B22; --rojo-claro:#FDECEF; --rojo-borde:#e3c4ca;
+  --tinta:#1d1d1f; --gris:#6b6b70; --linea:#ececec; --fondo:#fbf7f7;
+  --ok:#1f8a4c; --ok-claro:#e8f6ee; --mal:#C8102E; --mal-claro:#fdecef;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:"Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;color:var(--tinta);background:var(--fondo);line-height:1.5;-webkit-font-smoothing:antialiased}
+button{font:inherit;cursor:pointer}
+/* ---------- header ---------- */
+header{background:var(--rojo);color:#fff;position:sticky;top:0;z-index:20;box-shadow:0 2px 10px rgba(158,11,34,.25)}
+.hwrap{max-width:1040px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.brand{display:flex;flex-direction:column;line-height:1.15;cursor:pointer}
+.brand small{font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:.85}
+.brand b{font-size:20px}
+nav{margin-left:auto;display:flex;gap:4px;flex-wrap:wrap}
+nav button{background:transparent;border:0;color:#fff;padding:8px 14px;border-radius:999px;font-weight:600;opacity:.9}
+nav button:hover{background:rgba(255,255,255,.14);opacity:1}
+nav button.on{background:#fff;color:var(--rojo);opacity:1}
+main{max-width:1040px;margin:0 auto;padding:26px 20px 60px}
+footer{text-align:center;color:var(--gris);font-size:13px;padding:0 20px 30px}
+/* ---------- comunes ---------- */
+h1.tit{font-size:28px;margin:0 0 4px;color:var(--rojo-osc)}
+.lead{color:var(--gris);margin:0 0 22px}
+.btn{border:2px solid var(--rojo);background:var(--rojo);color:#fff;padding:10px 18px;border-radius:10px;font-weight:700;transition:.15s}
+.btn:hover{background:var(--rojo-osc);border-color:var(--rojo-osc)}
+.btn.sec{background:#fff;color:var(--rojo)}
+.btn.sec:hover{background:var(--rojo-claro)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.card{background:#fff;border:1px solid var(--linea);border-radius:16px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.tag{display:inline-block;background:var(--rojo-claro);color:var(--rojo-osc);font-weight:700;font-size:12px;padding:3px 10px;border-radius:999px;letter-spacing:.02em}
+.bar{height:8px;background:#f1e3e5;border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--rojo);border-radius:99px;transition:width .3s}
+/* ---------- inicio ---------- */
+.hero{padding:26px;margin-bottom:22px;background:linear-gradient(135deg,#fff 0%,#fff 60%,var(--rojo-claro) 100%);border-left:6px solid var(--rojo)}
+.hero .acc{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.opts{display:flex;gap:18px;flex-wrap:wrap;margin-top:14px;color:var(--gris);font-size:14px}
+.opts label{display:flex;align-items:center;gap:6px;cursor:pointer}
+.opts input{accent-color:var(--rojo)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+.bloque{padding:20px;display:flex;flex-direction:column;gap:10px;transition:.15s;border-top:4px solid var(--rojo)}
+.bloque:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(158,11,34,.12)}
+.bloque .num{width:34px;height:34px;border-radius:10px;background:var(--rojo);color:#fff;display:grid;place-items:center;font-weight:800}
+.bloque h3{margin:0;font-size:18px}
+.bloque p{margin:0;color:var(--gris);font-size:14px}
+.bloque .meta{display:flex;justify-content:space-between;font-size:13px;color:var(--gris)}
+.bloque .row{display:flex;gap:8px;margin-top:auto;padding-top:4px}
+.bloque .row .btn{flex:1;padding:8px 10px;font-size:14px}
+.toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:16px;padding-top:16px;border-top:1px solid var(--linea)}
+.sel-tema{flex:1;min-width:240px;padding:10px 12px;border:2px solid var(--rojo-borde);border-radius:10px;font:inherit;font-weight:600;color:var(--rojo-osc);background:#fff;cursor:pointer}
+.sel-tema:focus{outline:none;border-color:var(--rojo)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.mix{display:flex;gap:6px;flex-wrap:wrap}
+.mix span{font-size:12px;background:var(--rojo-claro);color:var(--rojo-osc);padding:2px 8px;border-radius:99px;font-weight:600}
+.aviso{background:#fff7e6;border:1px solid #f1d39a;border-radius:10px;padding:10px 14px;margin:0 0 14px}
+/* ---------- quiz ---------- */
+.qtop{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.qtop .cont{margin-left:auto;font-size:14px;color:var(--gris);font-weight:600}
+.qtop .score{font-size:14px;font-weight:700;color:var(--ok)}
+.qtop .score b{color:var(--mal);margin-left:8px}
+.qcard{padding:26px;margin-top:14px}
+.qtext{font-size:19px;font-weight:650;margin:0 0 6px}
+.hint{font-size:13px;color:var(--rojo);font-weight:700;margin-bottom:14px}
+.qimg{margin:6px 0 16px;text-align:center}
+.qimg img{max-width:100%;border:1px solid var(--linea);border-radius:10px;cursor:zoom-in}
+.olist{display:flex;flex-direction:column;gap:10px}
+.opt{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:2px solid var(--linea);border-radius:12px;background:#fff;cursor:pointer;text-align:left;transition:.12s;width:100%}
+.opt:hover{border-color:var(--rojo-borde);background:#fffafa}
+.opt .mk{flex:none;width:22px;height:22px;border:2px solid #c9c9cf;margin-top:1px;display:grid;place-items:center;font-size:13px;color:#fff;font-weight:800}
+.opt.radio .mk{border-radius:50%}
+.opt.check .mk{border-radius:6px}
+.opt .k{flex:none;font-size:12px;color:var(--gris);margin-top:3px;min-width:14px}
+.opt.sel{border-color:var(--rojo);background:var(--rojo-claro)}
+.opt.sel .mk{border-color:var(--rojo);background:var(--rojo)}
+.opt.sel.radio .mk::after{content:"";width:8px;height:8px;border-radius:50%;background:#fff}
+.opt.sel.check .mk::after{content:"✓"}
+.opt.lock{cursor:default}
+.opt.lock:hover{background:#fff;border-color:var(--linea)}
+.opt.good{border-color:var(--ok)!important;background:var(--ok-claro)!important}
+.opt.good .mk{border-color:var(--ok);background:var(--ok)}
+.opt.good .mk::after{content:"✓"!important;width:auto!important;height:auto!important;background:none!important}
+.opt.bad{border-color:var(--mal)!important;background:var(--mal-claro)!important}
+.opt.bad .mk{border-color:var(--mal);background:var(--mal)}
+.opt.bad .mk::after{content:"✕"!important;width:auto!important;height:auto!important;background:none!important}
+.opt.miss{border-style:dashed!important;border-color:var(--ok)!important}
+.opt.miss .mk{background:#fff;border-color:var(--ok)}
+.opt.miss .mk::after{content:""!important}
+.opt.miss::after{content:"correcta";margin-left:auto;font-size:12px;font-weight:700;color:var(--ok);align-self:center}
+.qact{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}
+.fb{margin-top:18px;border-radius:12px;padding:16px 18px;border-left:6px solid}
+.fb.ok{background:var(--ok-claro);border-color:var(--ok)}
+.fb.no{background:var(--mal-claro);border-color:var(--mal)}
+.fb h4{margin:0 0 6px;font-size:17px}
+.fb.ok h4{color:var(--ok)} .fb.no h4{color:var(--mal)}
+.fb .ans{font-size:14px;margin:0 0 8px}
+.fb .why{margin:0}
+.fb .src{margin-top:8px;font-size:12.5px;color:var(--gris)}
+.fb .src::before{content:"📖 "}
+.nota{margin-top:10px;font-size:13.5px;background:#fff7e6;border:1px solid #f1d39a;border-radius:8px;padding:8px 10px}
+.nota b{color:#9a6200}
+/* ---------- resultados ---------- */
+.res{padding:28px;text-align:center}
+.big{font-size:64px;font-weight:800;color:var(--rojo);line-height:1}
+.big small{font-size:24px;color:var(--gris)}
+.res .acc{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+.rev{margin-top:20px;display:flex;flex-direction:column;gap:12px}
+.ritem{padding:16px 18px;border-left:5px solid var(--linea)}
+.ritem.ok{border-left-color:var(--ok)} .ritem.no{border-left-color:var(--mal)}
+.ritem .rq{font-weight:650;margin:6px 0}
+.ritem ul{margin:6px 0 0;padding-left:20px}
+.ritem li.c{color:var(--ok);font-weight:650}
+.ritem li.x{color:var(--mal);text-decoration:line-through}
+.ritem .why{color:#333;font-size:14.5px;margin-top:8px}
+.ritem .src{font-size:12.5px;color:var(--gris);margin-top:4px}
+.ritem img{max-width:100%;border:1px solid var(--linea);border-radius:8px;margin-top:6px}
+/* ---------- repaso ---------- */
+.filtros{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.chip{cursor:pointer;border:2px solid var(--rojo-borde);background:#fff;color:var(--rojo-osc);padding:6px 12px;border-radius:999px;font-weight:600;font-size:14px}
+.chip.on{background:var(--rojo);border-color:var(--rojo);color:#fff}
+.buscar{flex:1;min-width:200px;padding:9px 12px;border:2px solid var(--linea);border-radius:10px;font:inherit}
+.buscar:focus{outline:none;border-color:var(--rojo)}
+/* ---------- stats ---------- */
+table.st{width:100%;border-collapse:collapse;background:#fff;border-radius:14px;overflow:hidden}
+table.st th{background:var(--rojo);color:#fff;text-align:left;padding:10px 14px;font-size:14px}
+table.st td{padding:10px 14px;border-bottom:1px solid var(--linea)}
+table.st tr:last-child td{border-bottom:0;font-weight:700;background:var(--rojo-claro)}
+.zoom{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;place-items:center;z-index:50;cursor:zoom-out;padding:20px}
+.zoom img{max-width:100%;max-height:100%;background:#fff;border-radius:8px}
+.zoom.on{display:grid}
+@media (max-width:640px){
+  .qcard{padding:18px} .qtext{font-size:17px} h1.tit{font-size:23px} .hwrap{padding:10px 14px} nav button{padding:6px 10px;font-size:14px}
+}
+</style>
+</head>
+<body>
+<header><div class="hwrap">
+  <div class="brand" onclick="ir('inicio')"><small>Redes de Datos · 4K4</small><b>Simulador · Parcial 3</b></div>
+  <nav id="nav">
+    <button data-v="inicio">Inicio</button>
+    <button data-v="simulacro">Simulacro</button>
+    <button data-v="repaso">Repaso</button>
+    <button data-v="stats">Estadísticas</button>
+  </nav>
+</div></header>
+<main id="app"></main>
+<footer>Preguntas tomadas del FORMS del 3er parcial · Justificaciones basadas en el resumen y las filminas de la cátedra · Sin preguntas de QoS ni MPLS (Parcial 2)</footer>
+<div class="zoom" id="zoom" onclick="this.classList.remove('on')"><img id="zoomimg" alt=""></div>
+
+<script>
+/*__PREGUNTAS__*/
+/*__IMGS__*/
+
+// ---------- utilidades ----------
+const $ = s => document.querySelector(s);
+const app = $("#app");
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const hash = s => { let h = 5381; for (const ch of s) h = ((h << 5) + h + ch.charCodeAt(0)) | 0; return (h >>> 0).toString(36); };
+PREGUNTAS.forEach((p, i) => { p.id = hash(p.b + "|" + p.q + "|" + p.o.join("|")); p.i = i; });
+const bloque = id => BLOQUES.find(b => b.id === id);
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+// ---------- persistencia ----------
+const LS = "simulador-p3-redes";
+let DB = { st: {}, mezclarOpc: true, mezclarPreg: true };
+try { DB = Object.assign(DB, JSON.parse(localStorage.getItem(LS) || "{}")); } catch (e) {}
+const guardar = () => { try { localStorage.setItem(LS, JSON.stringify(DB)); } catch (e) {} };
+function registrar(p, ok) {
+  const s = DB.st[p.id] || { a: 0, ok: 0, last: null };
+  s.a++; if (ok) s.ok++; s.last = ok; DB.st[p.id] = s; guardar();
+}
+const falladas = () => PREGUNTAS.filter(p => DB.st[p.id] && DB.st[p.id].last === false);
+
+// ---------- navegación ----------
+let Q = null; // estado del cuestionario en curso
+function ir(v, arg) {
+  document.querySelectorAll("#nav button").forEach(b => b.classList.toggle("on", b.dataset.v === v || (v === "quiz" && Q && Q.modo === "sim" && b.dataset.v === "simulacro")));
+  window.scrollTo(0, 0);
+  ({ inicio: vInicio, simulacro: vSimulacro, repaso: vRepaso, stats: vStats, quiz: vQuiz, res: vRes })[v](arg);
+}
+document.querySelectorAll("#nav button").forEach(b => b.onclick = () => ir(b.dataset.v));
+
+// ---------- bloques aleatorios (estables por semilla) ----------
+const N_BLOQUES = 4;
+if (!DB.seed) { DB.seed = Math.floor(Math.random() * 1e9) + 1; }
+DB.tema = DB.tema || "todos"; DB.estado = DB.estado || "todas";
+function rng(seed) { let s = seed >>> 0; return () => { s = (s + 0x6D2B79F5) | 0; let t = Math.imul(s ^ (s >>> 15), 1 | s); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+function bloquesAleatorios() {
+  const r = rng(DB.seed);
+  const a = PREGUNTAS.slice().sort((x, y) => x.id < y.id ? -1 : 1);
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  const tam = Math.ceil(a.length / N_BLOQUES);
+  return Array.from({ length: N_BLOQUES }, (_, k) => a.slice(k * tam, (k + 1) * tam));
+}
+const filtrarEstado = ps => DB.estado === "nuevas" ? ps.filter(p => !DB.st[p.id])
+  : DB.estado === "mal" ? ps.filter(p => DB.st[p.id] && DB.st[p.id].last === false) : ps;
+const ETQ_ESTADO = { todas: "", nuevas: " · no respondidas", mal: " · incorrectas" };
+
+// ---------- INICIO ----------
+function vInicio() {
+  const nf = falladas().length;
+  app.innerHTML = `
+  <div class="card hero">
+    <span class="tag">Práctica por bloques</span>
+    <h1 class="tit" style="margin-top:10px">Practicá el Parcial 3 de Redes de Datos</h1>
+    <p class="lead" style="margin:0">${PREGUNTAS.length} preguntas del FORMS. Elegí un bloque o filtrá por tema; al responder ves si está bien o mal y una justificación corta sacada del resumen o las filminas.</p>
+    <div class="toolbar">
+      <select id="tema" class="sel-tema">
+        <option value="todos">Todos los temas</option>
+        ${BLOQUES.map(b => `<option value="${b.id}" ${DB.tema === b.id ? "selected" : ""}>${b.n}. ${esc(b.titulo)}</option>`).join("")}
+      </select>
+      <div class="chips">
+        ${[["todas", "Todas"], ["nuevas", "No respondidas"], ["mal", "Incorrectas"]].map(([k, t]) => `<button class="chip ${DB.estado === k ? "on" : ""}" data-e="${k}">${t}</button>`).join("")}
+      </div>
+    </div>
+    <div class="acc">
+      <button class="btn" id="pt">Practicar selección</button>
+      ${nf ? `<button class="btn sec" onclick="empezar(falladas(),'Repaso de errores','prac')">Repasar errores (${nf})</button>` : ""}
+      <button class="btn sec" onclick="ir('simulacro')">Simulacro de parcial</button>
+      ${DB.tema === "todos" ? `<button class="btn sec" id="rb">Rearmar bloques</button>` : ""}
+    </div>
+    <div class="opts">
+      <label><input type="checkbox" id="mp" ${DB.mezclarPreg ? "checked" : ""}> Mezclar el orden de las preguntas</label>
+      <label><input type="checkbox" id="mo" ${DB.mezclarOpc ? "checked" : ""}> Mezclar las opciones</label>
+    </div>
+  </div>
+  <div class="grid">${cardsInicio()}</div>`;
+  $("#tema").onchange = e => { DB.tema = e.target.value; guardar(); vInicio(); };
+  app.querySelectorAll(".chip[data-e]").forEach(c => c.onclick = () => { DB.estado = c.dataset.e; guardar(); vInicio(); });
+  $("#pt").onclick = () => {
+    const base = DB.tema === "todos" ? PREGUNTAS : PREGUNTAS.filter(p => p.b === DB.tema);
+    const t = DB.tema === "todos" ? "Todos los temas" : `${bloque(DB.tema).n}. ${bloque(DB.tema).titulo}`;
+    lanzar(filtrarEstado(base), t + ETQ_ESTADO[DB.estado]);
+  };
+  const rb = $("#rb"); if (rb) rb.onclick = () => { DB.seed = Math.floor(Math.random() * 1e9) + 1; guardar(); vInicio(); };
+  $("#mp").onchange = e => { DB.mezclarPreg = e.target.checked; guardar(); };
+  $("#mo").onchange = e => { DB.mezclarOpc = e.target.checked; guardar(); };
+}
+function lanzar(ps, titulo) {
+  if (!ps.length) { const g = app.querySelector(".grid"); g.insertAdjacentHTML("beforebegin", `<p class="aviso">No hay preguntas con ese filtro todavía.</p>`); setTimeout(() => { const a = app.querySelector(".aviso"); if (a) a.remove(); }, 2500); return; }
+  empezar(ps, titulo, "prac");
+}
+let CARDS = [];
+const CORTO = { tr: "Transporte", dns: "DNS/Correo", nat: "NAT/PAT", app: "FTP/SNMP/HTTP", seg: "Seguridad" };
+function cardsInicio() {
+  if (DB.tema === "todos") {
+    CARDS = bloquesAleatorios().map((ps, k) => {
+      const mix = BLOQUES.map(b => [b, ps.filter(p => p.b === b.id).length]).filter(x => x[1]);
+      return { n: k + 1, titulo: `Bloque ${k + 1}`, sub: "Mezcla de todos los temas", ps, mix };
+    });
+  } else {
+    const b = bloque(DB.tema);
+    CARDS = [{ n: b.n, titulo: b.titulo, sub: b.sub, ps: PREGUNTAS.filter(p => p.b === b.id) }];
+  }
+  return CARDS.map((c, i) => cardBloque(c, i)).join("");
+}
+function cardBloque(c, i) {
+  const ps = c.ps;
+  const vistas = ps.filter(p => DB.st[p.id]).length;
+  const bien = ps.filter(p => DB.st[p.id] && DB.st[p.id].last).length;
+  const pct = Math.round(100 * bien / ps.length);
+  const sel = filtrarEstado(ps).length;
+  return `<div class="card bloque">
+    <div style="display:flex;gap:12px;align-items:center"><div class="num">${c.n}</div><div><h3>${esc(c.titulo)}</h3><p>${esc(c.sub)}</p></div></div>
+    <div class="meta"><span>${ps.length} preguntas · ${vistas} hechas</span><span title="Respondidas bien la última vez">${pct}% ✓</span></div>
+    <div class="bar"><i style="width:${pct}%"></i></div>
+    <div class="row">
+      <button class="btn" onclick="practicarCard(${i})" ${sel ? "" : "disabled"}>${DB.estado === "todas" ? "Practicar" : `Practicar (${sel})`}</button>
+    </div>
+  </div>`;
+}
+function practicarCard(i) {
+  const c = CARDS[i];
+  lanzar(filtrarEstado(c.ps), (DB.tema === "todos" ? c.titulo : `${c.n}. ${c.titulo}`) + ETQ_ESTADO[DB.estado]);
+}
+
+// ---------- SIMULACRO ----------
+function vSimulacro() {
+  app.innerHTML = `
+  <h1 class="tit">Simulacro de parcial</h1>
+  <p class="lead">Preguntas al azar de todos los bloques, repartidas en proporción. No ves las respuestas hasta terminar, como en el parcial. Al final tenés la nota sobre 10 y la corrección de cada pregunta.</p>
+  <div class="grid">
+    ${[10, 20, 30].map(n => `<div class="card bloque">
+      <div style="display:flex;gap:12px;align-items:center"><div class="num">${n}</div><div><h3>${n} preguntas</h3><p>${n === 10 ? "Rápido, unos 10 minutos" : n === 20 ? "Formato tipo parcial" : "Repaso largo"}</p></div></div>
+      <div class="row"><button class="btn" onclick="simulacro(${n})">Empezar</button></div>
+    </div>`).join("")}
+  </div>`;
+}
+function simulacro(n) {
+  // reparto proporcional por bloque
+  const sel = [];
+  const tot = PREGUNTAS.length;
+  BLOQUES.forEach(b => {
+    const ps = shuffle(PREGUNTAS.filter(p => p.b === b.id));
+    sel.push(...ps.slice(0, Math.max(1, Math.round(n * ps.length / tot))));
+  });
+  let fin = shuffle(sel).slice(0, n);
+  if (fin.length < n) fin = fin.concat(shuffle(PREGUNTAS.filter(p => !fin.includes(p))).slice(0, n - fin.length));
+  empezar(fin, `Simulacro · ${n} preguntas`, "sim", true);
+}
+
+// ---------- CUESTIONARIO ----------
+function empezar(lista, titulo, modo, yaMezclado) {
+  if (!lista.length) return;
+  let ps = lista.slice();
+  if (DB.mezclarPreg && !yaMezclado) ps = shuffle(ps);
+  Q = {
+    titulo, modo, idx: 0, bien: 0, mal: 0,
+    items: ps.map(p => ({ p, orden: ordenOpc(p), sel: [], resp: false, ok: null }))
+  };
+  ir("quiz");
+}
+function ordenOpc(p) {
+  const idx = p.o.map((_, i) => i);
+  if (!DB.mezclarOpc) return idx;
+  const ning = idx.filter(i => /^ninguna de las opciones/i.test(p.o[i]));
+  return shuffle(idx.filter(i => !ning.includes(i))).concat(ning);
+}
+function vQuiz() {
+  if (!Q) return ir("inicio");
+  const it = Q.items[Q.idx], p = it.p, multi = p.c.length > 1;
+  const n = Q.items.length, b = bloque(p.b);
+  const sim = Q.modo === "sim";
+  const lock = it.resp;
+  const opts = it.orden.map((oi, k) => {
+    let cls = "opt " + (multi ? "check" : "radio");
+    if (it.sel.includes(oi)) cls += " sel";
+    if (lock) {
+      cls += " lock";
+      const esC = p.c.includes(oi), elegida = it.sel.includes(oi);
+      if (esC && elegida) cls += " good";
+      else if (!esC && elegida) cls += " bad";
+      else if (esC) cls += " good miss";
+    }
+    return `<button class="${cls}" data-oi="${oi}"><span class="mk"></span><span class="k">${k + 1}</span><span>${esc(p.o[oi])}</span></button>`;
+  }).join("");
+  app.innerHTML = `
+  <div class="qtop">
+    <span class="tag">${esc(Q.titulo)}</span>
+    ${sim ? "" : `<span class="score">✓ ${Q.bien}<b>✕ ${Q.mal}</b></span>`}
+    <span class="cont">Pregunta ${Q.idx + 1} de ${n}</span>
+  </div>
+  <div class="bar"><i style="width:${100 * (Q.idx + (lock ? 1 : 0)) / n}%"></i></div>
+  <div class="card qcard">
+    <div style="margin-bottom:8px"><span class="tag">${b.n}. ${esc(b.titulo)}</span></div>
+    <p class="qtext">${esc(p.q)}</p>
+    <div class="hint">${multi ? `Seleccioná ${p.c.length} opciones` : "Seleccioná una opción"}</div>
+    ${p.img ? `<div class="qimg"><img src="${IMGS[p.img]}" alt="Imagen de la pregunta" onclick="zoom(this.src)"></div>` : ""}
+    <div class="olist">${opts}</div>
+    ${lock && !sim ? feedback(it) : ""}
+    <div class="qact">
+      ${Q.idx > 0 && sim ? `<button class="btn sec" onclick="mover(-1)">← Anterior</button>` : ""}
+      <button class="btn sec" onclick="salir()">Salir</button>
+      ${sim
+        ? `<button class="btn" id="go" onclick="simSig()" ${it.sel.length ? "" : "disabled"}>${Q.idx === n - 1 ? "Terminar y corregir" : "Siguiente →"}</button>`
+        : lock
+          ? `<button class="btn" id="go" onclick="sig()">${Q.idx === n - 1 ? "Ver resultados" : "Siguiente →"}</button>`
+          : `<button class="btn" id="go" onclick="responder()" ${it.sel.length ? "" : "disabled"}>Responder</button>`}
+    </div>
+  </div>`;
+  if (!lock || sim) app.querySelectorAll(".opt").forEach(el => el.onclick = () => elegir(+el.dataset.oi));
+}
+function elegir(oi) {
+  const it = Q.items[Q.idx], multi = it.p.c.length > 1;
+  if (it.resp && Q.modo !== "sim") return;
+  if (multi) it.sel = it.sel.includes(oi) ? it.sel.filter(x => x !== oi) : it.sel.concat(oi);
+  else it.sel = [oi];
+  vQuiz();
+}
+const esOk = it => it.sel.length === it.p.c.length && it.p.c.every(c => it.sel.includes(c));
+function responder() {
+  const it = Q.items[Q.idx];
+  if (!it.sel.length || it.resp) return;
+  it.resp = true; it.ok = esOk(it);
+  it.ok ? Q.bien++ : Q.mal++;
+  registrar(it.p, it.ok);
+  vQuiz();
+  const fb = app.querySelector(".fb"); if (fb) fb.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+function feedback(it) {
+  const p = it.p;
+  const corr = p.c.map(i => esc(p.o[i])).join(" · ");
+  return `<div class="fb ${it.ok ? "ok" : "no"}">
+    <h4>${it.ok ? "✓ ¡Correcto!" : "✕ Incorrecto"}</h4>
+    ${it.ok ? "" : `<p class="ans"><b>Respuesta correcta:</b> ${corr}</p>`}
+    <p class="why">${esc(p.why)}</p>
+    ${p.nota ? `<div class="nota"><b>Ojo:</b> ${esc(p.nota)}</div>` : ""}
+    <div class="src">${esc(p.src)}</div>
+  </div>`;
+}
+function sig() { if (Q.idx < Q.items.length - 1) { Q.idx++; ir("quiz"); } else ir("res"); }
+function mover(d) { Q.idx = Math.max(0, Math.min(Q.items.length - 1, Q.idx + d)); ir("quiz"); }
+function simSig() {
+  const it = Q.items[Q.idx]; if (!it.sel.length) return;
+  if (Q.idx < Q.items.length - 1) { Q.idx++; ir("quiz"); return; }
+  Q.items.forEach(x => { x.resp = true; x.ok = esOk(x); x.ok ? Q.bien++ : Q.mal++; registrar(x.p, x.ok); });
+  ir("res");
+}
+function salir() {
+  if (Q && Q.modo === "prac" && (Q.bien + Q.mal) > 0) { Q.items = Q.items.filter(x => x.resp); ir("res"); }
+  else { Q = null; ir("inicio"); }
+}
+function zoom(src) { $("#zoomimg").src = src; $("#zoom").classList.add("on"); }
+
+// ---------- RESULTADOS ----------
+function vRes() {
+  if (!Q) return ir("inicio");
+  const tot = Q.items.length, bien = Q.items.filter(x => x.ok).length;
+  const nota = tot ? Math.round(100 * bien / tot) / 10 : 0;
+  const malas = Q.items.filter(x => !x.ok).map(x => x.p);
+  const msj = nota >= 8 ? "¡Muy bien! Estás en zona de 8 o más." : nota >= 6 ? "Vas bien, repasá los errores para llegar al 8." : "Repasá los errores con el resumen al lado y volvé a intentar.";
+  app.innerHTML = `
+  <div class="card res">
+    <span class="tag">${esc(Q.titulo)}</span>
+    <div class="big" style="margin-top:14px">${nota.toString().replace(".", ",")}<small> / 10</small></div>
+    <p style="font-size:18px;margin:10px 0 4px"><b>${bien}</b> de <b>${tot}</b> correctas</p>
+    <p class="lead" style="margin:0">${msj}</p>
+    <div class="acc">
+      ${malas.length ? `<button class="btn" id="rf">Reintentar las ${malas.length} falladas</button>` : ""}
+      <button class="btn sec" onclick="Q=null;ir('inicio')">Volver al inicio</button>
+    </div>
+  </div>
+  <h2 style="margin:28px 0 6px;color:var(--rojo-osc)">Corrección</h2>
+  <div class="rev">${Q.items.map(revItem).join("")}</div>`;
+  if (malas.length) $("#rf").onclick = () => empezar(malas, "Reintento de falladas", "prac");
+}
+function revItem(x) {
+  const p = x.p, b = bloque(p.b);
+  const li = p.o.map((o, i) => {
+    const c = p.c.includes(i), s = x.sel.includes(i);
+    if (!c && !s) return "";
+    return `<li class="${c ? "c" : "x"}">${esc(o)}${c && s ? " ✓" : c ? " (correcta)" : " (tu respuesta)"}</li>`;
+  }).join("");
+  return `<div class="card ritem ${x.ok ? "ok" : "no"}">
+    <span class="tag">${b.n}. ${esc(b.titulo)}</span> <b style="color:${x.ok ? "var(--ok)" : "var(--mal)"}">${x.ok ? "✓ Correcta" : "✕ Incorrecta"}</b>
+    <div class="rq">${esc(p.q)}</div>
+    ${p.img ? `<img src="${IMGS[p.img]}" alt="" onclick="zoom(this.src)" style="max-width:420px;cursor:zoom-in">` : ""}
+    <ul>${li}</ul>
+    <div class="why">${esc(p.why)}</div>
+    ${p.nota ? `<div class="nota"><b>Ojo:</b> ${esc(p.nota)}</div>` : ""}
+    <div class="src">📖 ${esc(p.src)}</div>
+  </div>`;
+}
+
+// ---------- REPASO ----------
+let RF = { b: "todos", t: "" };
+function vRepaso() {
+  app.innerHTML = `
+  <h1 class="tit">Repaso</h1>
+  <p class="lead">Todas las preguntas con su respuesta correcta y la justificación. Sirve para leer junto con el resumen impreso.</p>
+  <div class="filtros">
+    <button class="chip" data-b="todos">Todos</button>
+    ${BLOQUES.map(b => `<button class="chip" data-b="${b.id}">${b.n}. ${esc(b.titulo)}</button>`).join("")}
+    <input class="buscar" id="bus" placeholder="Buscar (ej.: MIME, puerto, IPsec)…" value="${esc(RF.t)}">
+  </div>
+  <div class="rev" id="rlist"></div>`;
+  app.querySelectorAll(".chip").forEach(c => c.onclick = () => { RF.b = c.dataset.b; pintarRepaso(); });
+  $("#bus").oninput = e => { RF.t = e.target.value; pintarRepaso(); };
+  pintarRepaso();
+}
+function pintarRepaso() {
+  app.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c.dataset.b === RF.b));
+  const t = RF.t.trim().toLowerCase();
+  const ps = PREGUNTAS.filter(p => (RF.b === "todos" || p.b === RF.b) &&
+    (!t || (p.q + " " + p.o.join(" ") + " " + p.why).toLowerCase().includes(t)));
+  $("#rlist").innerHTML = ps.length ? ps.map(p => revItem({ p, sel: p.c, ok: true })
+    .replace(/<b style="color:var\(--ok\)">✓ Correcta<\/b>/, "").replace(/ ✓<\/li>/g, "</li>")).join("")
+    : `<p class="lead">No hay preguntas que coincidan.</p>`;
+}
+
+// ---------- ESTADÍSTICAS ----------
+function vStats() {
+  const filas = BLOQUES.map(b => {
+    const ps = PREGUNTAS.filter(p => p.b === b.id);
+    const a = ps.reduce((s, p) => s + (DB.st[p.id] ? DB.st[p.id].a : 0), 0);
+    const ok = ps.reduce((s, p) => s + (DB.st[p.id] ? DB.st[p.id].ok : 0), 0);
+    const vistas = ps.filter(p => DB.st[p.id]).length;
+    return { t: `${b.n}. ${b.titulo}`, n: ps.length, vistas, a, ok };
+  });
+  const T = filas.reduce((s, f) => ({ t: "Total", n: s.n + f.n, vistas: s.vistas + f.vistas, a: s.a + f.a, ok: s.ok + f.ok }), { n: 0, vistas: 0, a: 0, ok: 0 });
+  const pc = f => f.a ? Math.round(100 * f.ok / f.a) + "%" : "–";
+  app.innerHTML = `
+  <h1 class="tit">Estadísticas</h1>
+  <p class="lead">Se guardan en este navegador. “Aciertos” cuenta todos los intentos.</p>
+  <table class="st">
+    <tr><th>Bloque</th><th>Preguntas</th><th>Vistas</th><th>Intentos</th><th>Aciertos</th></tr>
+    ${filas.concat(T).map(f => `<tr><td>${esc(f.t)}</td><td>${f.n}</td><td>${f.vistas}</td><td>${f.a}</td><td>${pc(f)}</td></tr>`).join("")}
+  </table>
+  <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
+    <button class="btn sec" id="rst">Borrar estadísticas</button>
+  </div>`;
+  const r = $("#rst");
+  r.onclick = () => {
+    if (r.dataset.c) { DB.st = {}; guardar(); vStats(); }
+    else { r.dataset.c = 1; r.textContent = "¿Seguro? Tocá de nuevo para borrar"; }
+  };
+}
+
+// ---------- teclado ----------
+document.addEventListener("keydown", e => {
+  if (!Q || !app.querySelector(".qcard") || e.target.tagName === "INPUT") return;
+  const it = Q.items[Q.idx];
+  if (/^[1-9]$/.test(e.key)) { const oi = it.orden[+e.key - 1]; if (oi !== undefined) elegir(oi); }
+  if (e.key === "Enter") { const g = $("#go"); if (g && !g.disabled) { e.preventDefault(); g.click(); } }
+});
+
+ir("inicio");
+</script>
+</body>
+</html>
