@@ -62,6 +62,12 @@ h1.tit{font-size:28px;margin:0 0 4px;color:var(--rojo-osc)}
 .mix{display:flex;gap:6px;flex-wrap:wrap}
 .mix span{font-size:12px;background:var(--rojo-claro);color:var(--rojo-osc);padding:2px 8px;border-radius:99px;font-weight:600}
 .aviso{background:#fff7e6;border:1px solid #f1d39a;border-radius:10px;padding:10px 14px;margin:0 0 14px}
+.grid-q{border-collapse:collapse;width:100%;max-width:520px}
+.grid-q td{padding:7px 10px;border-bottom:1px solid var(--linea)}
+.grid-q .gf{font-weight:650;width:40%}
+.grid-q select{font:inherit;padding:6px 8px;border:2px solid var(--rojo-borde);border-radius:8px;min-width:110px}
+.grid-q tr.good td{background:var(--ok-claro)} .grid-q tr.bad td{background:var(--mal-claro)}
+.grid-q .gc{color:var(--ok);font-weight:700}
 /* ---------- quiz ---------- */
 .qtop{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
 .qtop .cont{margin-left:auto;font-size:14px;color:var(--gris);font-weight:600}
@@ -318,9 +324,21 @@ function empezar(lista, titulo, modo, yaMezclado) {
   };
   ir("quiz");
 }
+const esGrid = p => Array.isArray(p.filas);
+const listo = it => esGrid(it.p) ? it.p.filas.every((_, r) => it.sel[r] >= 0) : it.sel.length > 0;
+function gridHTML(it, lock) {
+  const p = it.p;
+  return `<table class="grid-q">${p.filas.map((f, r) => {
+    const v = it.sel[r] >= 0 ? it.sel[r] : -1, ok = v === p.c[r];
+    const cls = lock ? (ok ? "good" : "bad") : "";
+    return `<tr class="${cls}"><td class="gf">${esc(f)}</td><td><select data-r="${r}" ${lock ? "disabled" : ""}>
+      <option value="-1">Elegir…</option>${p.o.map((o, i) => `<option value="${i}" ${v === i ? "selected" : ""}>${esc(o)}</option>`).join("")}
+    </select>${lock && !ok ? ` <span class="gc">→ ${esc(p.o[p.c[r]])}</span>` : ""}</td></tr>`;
+  }).join("")}</table>`;
+}
 function ordenOpc(p) {
   const idx = p.o.map((_, i) => i);
-  if (!DB.mezclarOpc) return idx;
+  if (!DB.mezclarOpc || esGrid(p)) return idx;
   const ning = idx.filter(i => /^ninguna de las opciones/i.test(p.o[i]));
   return shuffle(idx.filter(i => !ning.includes(i))).concat(ning);
 }
@@ -330,7 +348,8 @@ function vQuiz() {
   const n = Q.items.length, b = bloque(p.b);
   const sim = Q.modo === "sim";
   const lock = it.resp;
-  const opts = it.orden.map((oi, k) => {
+  const lockG = lock && !sim;
+  const opts = esGrid(p) ? gridHTML(it, lockG) : it.orden.map((oi, k) => {
     let cls = "opt " + (multi ? "check" : "radio");
     if (it.sel.includes(oi)) cls += " sel";
     if (lock) {
@@ -352,7 +371,7 @@ function vQuiz() {
   <div class="card qcard">
     <div style="margin-bottom:8px"><span class="tag">${b.n}. ${esc(b.titulo)}</span></div>
     <p class="qtext">${esc(p.q)}</p>
-    <div class="hint">${multi ? `Seleccioná ${p.c.length} opciones` : "Seleccioná una opción"}</div>
+    <div class="hint">${esGrid(p) ? "Elegí la opción correcta para cada fila" : multi ? `Seleccioná ${p.c.length} opciones` : "Seleccioná una opción"}</div>
     ${p.img ? `<div class="qimg"><img src="${IMGS[p.img]}" alt="Imagen de la pregunta" onclick="zoom(this.src)"></div>` : ""}
     <div class="olist">${opts}</div>
     ${lock && !sim ? feedback(it) : ""}
@@ -360,13 +379,16 @@ function vQuiz() {
       ${Q.idx > 0 && sim ? `<button class="btn sec" onclick="mover(-1)">← Anterior</button>` : ""}
       <button class="btn sec" onclick="salir()">Salir</button>
       ${sim
-        ? `<button class="btn" id="go" onclick="simSig()" ${it.sel.length ? "" : "disabled"}>${Q.idx === n - 1 ? "Terminar y corregir" : "Siguiente →"}</button>`
+        ? `<button class="btn" id="go" onclick="simSig()" ${listo(it) ? "" : "disabled"}>${Q.idx === n - 1 ? "Terminar y corregir" : "Siguiente →"}</button>`
         : lock
           ? `<button class="btn" id="go" onclick="sig()">${Q.idx === n - 1 ? "Ver resultados" : "Siguiente →"}</button>`
-          : `<button class="btn" id="go" onclick="responder()" ${it.sel.length ? "" : "disabled"}>Responder</button>`}
+          : `<button class="btn" id="go" onclick="responder()" ${listo(it) ? "" : "disabled"}>Responder</button>`}
     </div>
   </div>`;
   if (!lock || sim) app.querySelectorAll(".opt").forEach(el => el.onclick = () => elegir(+el.dataset.oi));
+  if (esGrid(p) && (!lock || sim)) app.querySelectorAll(".grid-q select").forEach(el => el.onchange = () => {
+    it.sel[+el.dataset.r] = +el.value; const g = $("#go"); if (g && g.textContent.trim() !== "Ver resultados") g.disabled = !listo(it);
+  });
 }
 function elegir(oi) {
   const it = Q.items[Q.idx], multi = it.p.c.length > 1;
@@ -375,10 +397,11 @@ function elegir(oi) {
   else it.sel = [oi];
   vQuiz();
 }
-const esOk = it => it.sel.length === it.p.c.length && it.p.c.every(c => it.sel.includes(c));
+const esOk = it => esGrid(it.p) ? it.p.c.every((c, r) => it.sel[r] === c)
+  : it.sel.length === it.p.c.length && it.p.c.every(c => it.sel.includes(c));
 function responder() {
   const it = Q.items[Q.idx];
-  if (!it.sel.length || it.resp) return;
+  if (!listo(it) || it.resp) return;
   it.resp = true; it.ok = esOk(it);
   it.ok ? Q.bien++ : Q.mal++;
   registrar(it.p, it.ok);
@@ -387,7 +410,7 @@ function responder() {
 }
 function feedback(it) {
   const p = it.p;
-  const corr = p.c.map(i => esc(p.o[i])).join(" · ");
+  const corr = esGrid(p) ? p.filas.map((f, r) => `${esc(f)} → ${esc(p.o[p.c[r]])}`).join(" · ") : p.c.map(i => esc(p.o[i])).join(" · ");
   return `<div class="fb ${it.ok ? "ok" : "no"}">
     <h4>${it.ok ? "✓ ¡Correcto!" : "✕ Incorrecto"}</h4>
     ${it.ok ? "" : `<p class="ans"><b>Respuesta correcta:</b> ${corr}</p>`}
@@ -399,7 +422,7 @@ function feedback(it) {
 function sig() { if (Q.idx < Q.items.length - 1) { Q.idx++; ir("quiz"); } else ir("res"); }
 function mover(d) { Q.idx = Math.max(0, Math.min(Q.items.length - 1, Q.idx + d)); ir("quiz"); }
 function simSig() {
-  const it = Q.items[Q.idx]; if (!it.sel.length) return;
+  const it = Q.items[Q.idx]; if (!listo(it)) return;
   if (Q.idx < Q.items.length - 1) { Q.idx++; ir("quiz"); return; }
   Q.items.forEach(x => { x.resp = true; x.ok = esOk(x); x.ok ? Q.bien++ : Q.mal++; registrar(x.p, x.ok); });
   ir("res");
@@ -434,7 +457,11 @@ function vRes() {
 }
 function revItem(x) {
   const p = x.p, b = bloque(p.b);
-  const li = p.o.map((o, i) => {
+  const li = esGrid(p) ? p.filas.map((f, r) => {
+    const s = x.sel[r], c = p.c[r];
+    return s === c ? `<li class="c">${esc(f)} → ${esc(p.o[c])}</li>`
+      : `<li class="c">${esc(f)} → ${esc(p.o[c])} (correcta)${s >= 0 ? ` <span style="color:var(--mal);text-decoration:line-through">${esc(p.o[s])}</span>` : ""}</li>`;
+  }).join("") : p.o.map((o, i) => {
     const c = p.c.includes(i), s = x.sel.includes(i);
     if (!c && !s) return "";
     return `<li class="${c ? "c" : "x"}">${esc(o)}${c && s ? " ✓" : c ? " (correcta)" : " (tu respuesta)"}</li>`;
@@ -508,7 +535,7 @@ function vStats() {
 document.addEventListener("keydown", e => {
   if (!Q || !app.querySelector(".qcard") || e.target.tagName === "INPUT") return;
   const it = Q.items[Q.idx];
-  if (/^[1-9]$/.test(e.key)) { const oi = it.orden[+e.key - 1]; if (oi !== undefined) elegir(oi); }
+  if (/^[1-9]$/.test(e.key) && !esGrid(it.p)) { const oi = it.orden[+e.key - 1]; if (oi !== undefined) elegir(oi); }
   if (e.key === "Enter") { const g = $("#go"); if (g && !g.disabled) { e.preventDefault(); g.click(); } }
 });
 
