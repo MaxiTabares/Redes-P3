@@ -142,6 +142,41 @@ table.st tr:last-child td{border-bottom:0;font-weight:700;background:var(--rojo-
 .zoom{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;place-items:center;z-index:50;cursor:zoom-out;padding:20px}
 .zoom img{max-width:100%;max-height:100%;background:#fff;border-radius:8px}
 .zoom.on{display:grid}
+/* contexto de preguntas simuladas (tablas, salidas, figuras) */
+.ctx{--code:#f6f4f4;--line:#e8dfe0;--muted:#6b6b70;--ink:#1d1d1f;--card:#fff;margin:4px 0 12px;overflow-x:auto}
+.ctx pre.out{background:var(--code);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font:13px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow:auto;white-space:pre;margin:6px 0 12px}
+.ctx table.t{width:100%;border-collapse:collapse;font-size:14px;margin:6px 0 12px}
+.ctx table.t td,.ctx table.t th{border:1px solid var(--line);padding:6px 8px;text-align:left}
+.ctx table.t th{background:var(--rojo-claro);color:var(--rojo-osc)}
+.ctx .fw{width:100%;border-collapse:separate;border-spacing:0 4px;font-size:14px;margin:6px 0 12px}
+.ctx .fw td{padding:7px 8px;background:var(--code)}
+.ctx .fw td:first-child{border-radius:6px 0 0 6px;color:#fff;font-weight:700;text-align:center;width:34px}
+.ctx .fw td:last-child{border-radius:0 6px 6px 0}
+.ctx .fw .g{background:#2e7d4f} .ctx .fw .r{background:#c0392b} .ctx .fw .k{background:#111}
+.ctx .fw .z{background:#e5f4e9;color:#1d5e36;border-radius:4px;padding:1px 6px}
+.ctx .fw .zr{background:#fbebea;color:#8c2a22;border-radius:4px;padding:1px 6px}
+.ctx .fw .cm{display:block;font-size:12px;color:var(--muted)}
+.ctx .legend{font-size:13px;color:var(--muted)}
+.ctx .fig{margin:8px 0 4px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 12px 6px}
+.ctx .fig figcaption{font-size:13.5px;color:var(--muted);text-align:center;margin:4px 0 2px}
+.ctx .fig svg{max-width:100%;height:auto} .ctx .fig img{max-width:100%;cursor:zoom-in}
+.sv .bx{stroke-width:1} .sv .tx{font-size:13px} .sv .tsm{font-size:11px} .sv .tb{font-weight:600}
+.sv .tl{font-size:12.5px;fill:var(--muted)} .sv .tbl{font-weight:600;fill:var(--ink)}
+.sv .ar,.sv .ar2{stroke:var(--muted);stroke-width:1.5} .sv .lk{stroke:var(--muted);stroke-width:1.3}
+.sv .lkx{stroke:#E24B4A;stroke-width:2;stroke-dasharray:6 4} .sv .lf{stroke:var(--line);stroke-width:1.2;stroke-dasharray:4 4}
+.sv .tn{stroke:#1D9E75;stroke-width:7;stroke-linecap:round;opacity:.6} .sv .ax{stroke:var(--muted);stroke-width:1}
+.sv .ln{stroke:#378ADD;stroke-width:2.2} .sv .dt{fill:#378ADD}
+.sv .bx.bl{fill:#e6f1fb;stroke:#378ADD} .sv .tx.bl{fill:#0C447C}
+.sv .bx.pu{fill:#eeedfe;stroke:#7F77DD} .sv .tx.pu{fill:#3C3489}
+.sv .bx.te{fill:#e1f5ee;stroke:#1D9E75} .sv .tx.te{fill:#085041}
+.sv .bx.am{fill:#faeeda;stroke:#BA7517} .sv .tx.am{fill:#633806}
+.sv .bx.co{fill:#faece7;stroke:#D85A30} .sv .tx.co{fill:#712B13}
+.sv .bx.gy{fill:#f1efe8;stroke:#888780} .sv .tx.gy{fill:#444441}
+.fb details{margin-top:10px;font-size:14.5px} .fb summary{cursor:pointer;font-weight:700;color:var(--rojo-osc)}
+.fb details ol{margin:6px 0 0;padding-left:20px} .fb details li{margin:3px 0}
+.tag.k1{background:#fff2d6;color:#8a5a0b}
+.aviso-sim{background:#fff7e6;border:1px solid #f1d39a;border-radius:10px;padding:10px 14px;font-size:14px;margin-top:14px}
+.ritem .ctx{max-width:640px}
 @media (max-width:640px){
   .qcard{padding:18px} .qtext{font-size:17px} h1.tit{font-size:23px} .hwrap{padding:10px 14px} nav button{padding:6px 10px;font-size:14px}
 }
@@ -152,17 +187,19 @@ table.st tr:last-child td{border-bottom:0;font-weight:700;background:var(--rojo-
   <div class="brand" onclick="ir('inicio')"><small>Redes de Datos · 4K4</small><b>Simulador · Parcial 3</b></div>
   <nav id="nav">
     <button data-v="inicio">Inicio</button>
+    <button data-v="simuladas">Simuladas</button>
     <button data-v="simulacro">Simulacro</button>
     <button data-v="repaso">Repaso</button>
     <button data-v="stats">Estadísticas</button>
   </nav>
 </div></header>
 <main id="app"></main>
-<footer>Preguntas tomadas del FORMS del 3er parcial · Justificaciones basadas en el resumen y las filminas de la cátedra · Sin preguntas de QoS ni MPLS (Parcial 2)</footer>
+<footer>Inicio: preguntas del FORMS del 3er parcial · Simuladas: “Simulacro dirigido” de facu-estudio · Justificaciones basadas en el resumen y las filminas de la cátedra · Sin preguntas de QoS ni MPLS (Parcial 2)</footer>
 <div class="zoom" id="zoom" onclick="this.classList.remove('on')"><img id="zoomimg" alt=""></div>
 
 <script>
 /*__PREGUNTAS__*/
+/*__SIMULADAS__*/
 /*__IMGS__*/
 
 // ---------- utilidades ----------
@@ -171,7 +208,15 @@ const app = $("#app");
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const hash = s => { let h = 5381; for (const ch of s) h = ((h << 5) + h + ch.charCodeAt(0)) | 0; return (h >>> 0).toString(36); };
 PREGUNTAS.forEach((p, i) => { p.id = hash(p.b + "|" + p.q + "|" + p.o.join("|")); p.i = i; });
-const bloque = id => BLOQUES.find(b => b.id === id);
+SIMULADAS.forEach((p, i) => { p.id = "s" + hash(p.q + "|" + p.o.join("|")); p.i = i; p.sim = true; });
+const bloque = id => BLOQUES.find(b => b.id === id) || BLOQUES_SIM.find(b => b.id === id);
+// Dos bancos: "inicio" = FORMS; "simuladas" = Simulacro dirigido (facu-estudio)
+const BANCOS = {
+  inicio: { ps: PREGUNTAS, bl: BLOQUES, kT: "tema", kS: "seed", corto: { tr: "Transporte", dns: "DNS/Correo", nat: "NAT/PAT", app: "FTP/SNMP/HTTP", seg: "Seguridad" } },
+  simuladas: { ps: SIMULADAS, bl: BLOQUES_SIM, kT: "temaS", kS: "seedS" }
+};
+let VISTA = "inicio";
+const banco = () => BANCOS[VISTA];
 const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
 // ---------- persistencia ----------
@@ -183,25 +228,29 @@ function registrar(p, ok) {
   const s = DB.st[p.id] || { a: 0, ok: 0, last: null };
   s.a++; if (ok) s.ok++; s.last = ok; DB.st[p.id] = s; guardar();
 }
-const falladas = () => PREGUNTAS.filter(p => DB.st[p.id] && DB.st[p.id].last === false);
+const falladas = () => banco().ps.filter(p => DB.st[p.id] && DB.st[p.id].last === false);
 
 // ---------- navegación ----------
 let Q = null; // estado del cuestionario en curso
 function ir(v, arg) {
-  document.querySelectorAll("#nav button").forEach(b => b.classList.toggle("on", b.dataset.v === v || (v === "quiz" && Q && Q.modo === "sim" && b.dataset.v === "simulacro")));
+  if (v === "inicio" || v === "simuladas") VISTA = v;
+  const enSim = Q && Q.banco === "simuladas" && (v === "quiz" || v === "res");
+  document.querySelectorAll("#nav button").forEach(b => b.classList.toggle("on", b.dataset.v === v
+    || (enSim && b.dataset.v === "simuladas") || (!enSim && v === "quiz" && Q && Q.modo === "sim" && b.dataset.v === "simulacro")));
   window.scrollTo(0, 0);
-  ({ inicio: vInicio, simulacro: vSimulacro, repaso: vRepaso, stats: vStats, quiz: vQuiz, res: vRes })[v](arg);
+  ({ inicio: vInicio, simuladas: vInicio, simulacro: vSimulacro, repaso: vRepaso, stats: vStats, quiz: vQuiz, res: vRes })[v](arg);
 }
 document.querySelectorAll("#nav button").forEach(b => b.onclick = () => ir(b.dataset.v));
 
 // ---------- bloques aleatorios (estables por semilla) ----------
 const N_BLOQUES = 4;
 if (!DB.seed) { DB.seed = Math.floor(Math.random() * 1e9) + 1; }
-DB.tema = DB.tema || "todos"; DB.estado = DB.estado || "todas";
+if (!DB.seedS) { DB.seedS = Math.floor(Math.random() * 1e9) + 1; }
+DB.tema = DB.tema || "todos"; DB.temaS = DB.temaS || "todos"; DB.estado = DB.estado || "todas";
 function rng(seed) { let s = seed >>> 0; return () => { s = (s + 0x6D2B79F5) | 0; let t = Math.imul(s ^ (s >>> 15), 1 | s); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 function bloquesAleatorios() {
-  const r = rng(DB.seed);
-  const a = PREGUNTAS.slice().sort((x, y) => x.id < y.id ? -1 : 1);
+  const r = rng(DB[banco().kS]);
+  const a = banco().ps.slice().sort((x, y) => x.id < y.id ? -1 : 1);
   for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
   const tam = Math.ceil(a.length / N_BLOQUES);
   return Array.from({ length: N_BLOQUES }, (_, k) => a.slice(k * tam, (k + 1) * tam));
@@ -212,16 +261,19 @@ const ETQ_ESTADO = { todas: "", nuevas: " · no respondidas", mal: " · incorrec
 
 // ---------- INICIO ----------
 function vInicio() {
-  const nf = falladas().length;
+  const nf = falladas().length, B = banco(), S = VISTA === "simuladas", tema = DB[B.kT];
   app.innerHTML = `
   <div class="card hero">
-    <span class="tag">Práctica por bloques</span>
-    <h1 class="tit" style="margin-top:10px">Practicá el Parcial 3 de Redes de Datos</h1>
-    <p class="lead" style="margin:0">${PREGUNTAS.length} preguntas del FORMS. Elegí un bloque o filtrá por tema; al responder ves si está bien o mal y una justificación corta sacada del resumen o las filminas.</p>
+    <span class="tag">${S ? "Preguntas simuladas" : "Práctica por bloques"}</span>
+    <h1 class="tit" style="margin-top:10px">${S ? "Practicá con preguntas tipo parcial" : "Practicá el Parcial 3 de Redes de Datos"}</h1>
+    <p class="lead" style="margin:0">${S
+      ? `${SIMULADAS.length} preguntas del “Simulacro dirigido” (facu-estudio), con el formato de lo que tomaron: puertos, tablas NAT/PAT, firewall con colores, nslookup, gráficos. Incluye ${SIMULADAS.filter(p => p.cat === "Parcial otra comisión").length} del parcial del 4K1 (marcadas). Al responder ves la justificación y el paso a paso.`
+      : `${PREGUNTAS.length} preguntas del FORMS. Elegí un bloque o filtrá por tema; al responder ves si está bien o mal y una justificación corta sacada del resumen o las filminas.`}</p>
+    ${S ? `<div class="aviso-sim"><b>Ojo:</b> no son las preguntas del FORMS. Están armadas a partir de lo que se tomó y puede que no estén formuladas igual que en el parcial.</div>` : ""}
     <div class="toolbar">
       <select id="tema" class="sel-tema">
-        <option value="todos">Todos los temas</option>
-        ${BLOQUES.map(b => `<option value="${b.id}" ${DB.tema === b.id ? "selected" : ""}>${b.n}. ${esc(b.titulo)}</option>`).join("")}
+        <option value="todos">Todas las unidades</option>
+        ${B.bl.map(b => `<option value="${b.id}" ${tema === b.id ? "selected" : ""}>${S && b.n !== "+" ? "Unidad " : ""}${b.n === "+" ? "" : b.n + ". "}${esc(b.titulo)}</option>`).join("")}
       </select>
       <div class="chips">
         ${[["todas", "Todas"], ["nuevas", "No respondidas"], ["mal", "Incorrectas"]].map(([k, t]) => `<button class="chip ${DB.estado === k ? "on" : ""}" data-e="${k}">${t}</button>`).join("")}
@@ -230,8 +282,8 @@ function vInicio() {
     <div class="acc">
       <button class="btn" id="pt">Practicar selección</button>
       ${nf ? `<button class="btn sec" onclick="empezar(falladas(),'Repaso de errores','prac')">Repasar errores (${nf})</button>` : ""}
-      <button class="btn sec" onclick="ir('simulacro')">Simulacro de parcial</button>
-      ${DB.tema === "todos" ? `<button class="btn sec" id="rb">Rearmar bloques</button>` : ""}
+      ${S ? `<button class="btn sec" onclick="simulacro(20,'simuladas')">Simulacro de 20</button>` : `<button class="btn sec" onclick="ir('simulacro')">Simulacro de parcial</button>`}
+      ${tema === "todos" ? `<button class="btn sec" id="rb">Rearmar bloques</button>` : ""}
     </div>
     <div class="opts">
       <label><input type="checkbox" id="mp" ${DB.mezclarPreg ? "checked" : ""}> Mezclar el orden de las preguntas</label>
@@ -239,32 +291,30 @@ function vInicio() {
     </div>
   </div>
   <div class="grid">${cardsInicio()}</div>`;
-  $("#tema").onchange = e => { DB.tema = e.target.value; guardar(); vInicio(); };
+  $("#tema").onchange = e => { DB[B.kT] = e.target.value; guardar(); vInicio(); };
   app.querySelectorAll(".chip[data-e]").forEach(c => c.onclick = () => { DB.estado = c.dataset.e; guardar(); vInicio(); });
   $("#pt").onclick = () => {
-    const base = DB.tema === "todos" ? PREGUNTAS : PREGUNTAS.filter(p => p.b === DB.tema);
-    const t = DB.tema === "todos" ? "Todos los temas" : `${bloque(DB.tema).n}. ${bloque(DB.tema).titulo}`;
+    const base = tema === "todos" ? B.ps : B.ps.filter(p => p.b === tema);
+    const t = (tema === "todos" ? (S ? "Simuladas · todas" : "Todos los temas") : titB(bloque(tema)));
     lanzar(filtrarEstado(base), t + ETQ_ESTADO[DB.estado]);
   };
-  const rb = $("#rb"); if (rb) rb.onclick = () => { DB.seed = Math.floor(Math.random() * 1e9) + 1; guardar(); vInicio(); };
+  const rb = $("#rb"); if (rb) rb.onclick = () => { DB[B.kS] = Math.floor(Math.random() * 1e9) + 1; guardar(); vInicio(); };
   $("#mp").onchange = e => { DB.mezclarPreg = e.target.checked; guardar(); };
   $("#mo").onchange = e => { DB.mezclarOpc = e.target.checked; guardar(); };
 }
+const titB = b => (b.n === "+" ? "" : b.n + ". ") + b.titulo;
 function lanzar(ps, titulo) {
   if (!ps.length) { const g = app.querySelector(".grid"); g.insertAdjacentHTML("beforebegin", `<p class="aviso">No hay preguntas con ese filtro todavía.</p>`); setTimeout(() => { const a = app.querySelector(".aviso"); if (a) a.remove(); }, 2500); return; }
   empezar(ps, titulo, "prac");
 }
 let CARDS = [];
-const CORTO = { tr: "Transporte", dns: "DNS/Correo", nat: "NAT/PAT", app: "FTP/SNMP/HTTP", seg: "Seguridad" };
 function cardsInicio() {
-  if (DB.tema === "todos") {
-    CARDS = bloquesAleatorios().map((ps, k) => {
-      const mix = BLOQUES.map(b => [b, ps.filter(p => p.b === b.id).length]).filter(x => x[1]);
-      return { n: k + 1, titulo: `Bloque ${k + 1}`, sub: "Mezcla de todos los temas", ps, mix };
-    });
+  const B = banco(), tema = DB[B.kT];
+  if (tema === "todos") {
+    CARDS = bloquesAleatorios().map((ps, k) => ({ n: k + 1, titulo: `Bloque ${k + 1}`, sub: VISTA === "simuladas" ? "Mezcla de todas las unidades" : "Mezcla de todos los temas", ps }));
   } else {
-    const b = bloque(DB.tema);
-    CARDS = [{ n: b.n, titulo: b.titulo, sub: b.sub, ps: PREGUNTAS.filter(p => p.b === b.id) }];
+    const b = bloque(tema);
+    CARDS = [{ n: b.n, titulo: b.titulo, sub: b.sub, ps: B.ps.filter(p => p.b === b.id) }];
   }
   return CARDS.map((c, i) => cardBloque(c, i)).join("");
 }
@@ -285,7 +335,7 @@ function cardBloque(c, i) {
 }
 function practicarCard(i) {
   const c = CARDS[i];
-  lanzar(filtrarEstado(c.ps), (DB.tema === "todos" ? c.titulo : `${c.n}. ${c.titulo}`) + ETQ_ESTADO[DB.estado]);
+  lanzar(filtrarEstado(c.ps), (DB[banco().kT] === "todos" ? c.titulo : titB(c)) + ETQ_ESTADO[DB.estado]);
 }
 
 // ---------- SIMULACRO ----------
@@ -300,17 +350,19 @@ function vSimulacro() {
     </div>`).join("")}
   </div>`;
 }
-function simulacro(n) {
+function simulacro(n, k) {
   // reparto proporcional por bloque
+  const B = BANCOS[k || "inicio"], PS = B.ps;
   const sel = [];
-  const tot = PREGUNTAS.length;
-  BLOQUES.forEach(b => {
-    const ps = shuffle(PREGUNTAS.filter(p => p.b === b.id));
+  const tot = PS.length;
+  B.bl.forEach(b => {
+    const ps = shuffle(PS.filter(p => p.b === b.id));
     sel.push(...ps.slice(0, Math.max(1, Math.round(n * ps.length / tot))));
   });
   let fin = shuffle(sel).slice(0, n);
-  if (fin.length < n) fin = fin.concat(shuffle(PREGUNTAS.filter(p => !fin.includes(p))).slice(0, n - fin.length));
-  empezar(fin, `Simulacro · ${n} preguntas`, "sim", true);
+  if (fin.length < n) fin = fin.concat(shuffle(PS.filter(p => !fin.includes(p))).slice(0, n - fin.length));
+  if (k === "simuladas") VISTA = "simuladas"; else VISTA = "inicio";
+  empezar(fin, `${k === "simuladas" ? "Simulacro de simuladas" : "Simulacro"} · ${n} preguntas`, "sim", true);
 }
 
 // ---------- CUESTIONARIO ----------
@@ -319,7 +371,7 @@ function empezar(lista, titulo, modo, yaMezclado) {
   let ps = lista.slice();
   if (DB.mezclarPreg && !yaMezclado) ps = shuffle(ps);
   Q = {
-    titulo, modo, idx: 0, bien: 0, mal: 0,
+    titulo, modo, idx: 0, bien: 0, mal: 0, banco: VISTA,
     items: ps.map(p => ({ p, orden: ordenOpc(p), sel: [], resp: false, ok: null }))
   };
   ir("quiz");
@@ -369,7 +421,8 @@ function vQuiz() {
   </div>
   <div class="bar"><i style="width:${100 * (Q.idx + (lock ? 1 : 0)) / n}%"></i></div>
   <div class="card qcard">
-    <div style="margin-bottom:8px"><span class="tag">${b.n}. ${esc(b.titulo)}</span></div>
+    <div style="margin-bottom:8px"><span class="tag">${esc(etqB(b))}</span>${p.cat === "Parcial otra comisión" ? ` <span class="tag k1">Parcial 4K1</span>` : ""}</div>
+    ${ctxHTML(p)}
     <p class="qtext">${esc(p.q)}</p>
     <div class="hint">${esGrid(p) ? "Elegí la opción correcta para cada fila" : multi ? `Seleccioná ${p.c.length} opciones` : "Seleccioná una opción"}</div>
     ${p.img ? `<div class="qimg"><img src="${IMGS[p.img]}" alt="Imagen de la pregunta" onclick="zoom(this.src)"></div>` : ""}
@@ -415,8 +468,9 @@ function feedback(it) {
     <h4>${it.ok ? "✓ ¡Correcto!" : "✕ Incorrecto"}</h4>
     ${it.ok ? "" : `<p class="ans"><b>Respuesta correcta:</b> ${corr}</p>`}
     <p class="why">${esc(p.why)}</p>
+    ${pasosHTML(p)}
     ${p.nota ? `<div class="nota"><b>Ojo:</b> ${esc(p.nota)}</div>` : ""}
-    <div class="src">${esc(p.src)}</div>
+    <div class="src">${esc(fuente(p))}</div>
   </div>`;
 }
 function sig() { if (Q.idx < Q.items.length - 1) { Q.idx++; ir("quiz"); } else ir("res"); }
@@ -429,8 +483,12 @@ function simSig() {
 }
 function salir() {
   if (Q && Q.modo === "prac" && (Q.bien + Q.mal) > 0) { Q.items = Q.items.filter(x => x.resp); ir("res"); }
-  else { Q = null; ir("inicio"); }
+  else { const v = Q ? Q.banco : "inicio"; Q = null; ir(v); }
 }
+const etqB = b => b.n === "+" ? b.titulo : (BLOQUES_SIM.includes(b) ? `Unidad ${b.n}. ${b.titulo}` : `${b.n}. ${b.titulo}`);
+const ctxHTML = p => p.ctx >= 0 ? `<div class="ctx">${SIM_CTX[p.ctx]}</div>` : "";
+const pasosHTML = p => p.pasos && p.pasos.length ? `<details><summary>Ver el paso a paso</summary><ol>${p.pasos.map(x => `<li>${x}</li>`).join("")}</ol></details>` : "";
+const fuente = p => p.src || (p.cat === "Parcial otra comisión" ? "Parcial del 4K1 (Simulacro dirigido, facu-estudio)" : `Simulacro dirigido (facu-estudio) · ${p.cat}`);
 function zoom(src) { $("#zoomimg").src = src; $("#zoom").classList.add("on"); }
 
 // ---------- RESULTADOS ----------
@@ -448,7 +506,7 @@ function vRes() {
     <p class="lead" style="margin:0">${msj}</p>
     <div class="acc">
       ${malas.length ? `<button class="btn" id="rf">Reintentar las ${malas.length} falladas</button>` : ""}
-      <button class="btn sec" onclick="Q=null;ir('inicio')">Volver al inicio</button>
+      <button class="btn sec" onclick="const v=Q.banco;Q=null;ir(v)">Volver ${Q.banco === "simuladas" ? "a Simuladas" : "al inicio"}</button>
     </div>
   </div>
   <h2 style="margin:28px 0 6px;color:var(--rojo-osc)">Corrección</h2>
@@ -467,36 +525,40 @@ function revItem(x) {
     return `<li class="${c ? "c" : "x"}">${esc(o)}${c && s ? " ✓" : c ? " (correcta)" : " (tu respuesta)"}</li>`;
   }).join("");
   return `<div class="card ritem ${x.ok ? "ok" : "no"}">
-    <span class="tag">${b.n}. ${esc(b.titulo)}</span> <b style="color:${x.ok ? "var(--ok)" : "var(--mal)"}">${x.ok ? "✓ Correcta" : "✕ Incorrecta"}</b>
+    <span class="tag">${esc(etqB(b))}</span> <b style="color:${x.ok ? "var(--ok)" : "var(--mal)"}">${x.ok ? "✓ Correcta" : "✕ Incorrecta"}</b>
+    ${p.ctx >= 0 ? ctxHTML(p) : ""}
     <div class="rq">${esc(p.q)}</div>
     ${p.img ? `<img src="${IMGS[p.img]}" alt="" onclick="zoom(this.src)" style="max-width:420px;cursor:zoom-in">` : ""}
     <ul>${li}</ul>
     <div class="why">${esc(p.why)}</div>
     ${p.nota ? `<div class="nota"><b>Ojo:</b> ${esc(p.nota)}</div>` : ""}
-    <div class="src">📖 ${esc(p.src)}</div>
+    <div class="src">📖 ${esc(fuente(p))}</div>
   </div>`;
 }
 
 // ---------- REPASO ----------
-let RF = { b: "todos", t: "" };
+let RF = { b: "todos", t: "", k: "inicio" };
 function vRepaso() {
+  const B = BANCOS[RF.k];
   app.innerHTML = `
   <h1 class="tit">Repaso</h1>
   <p class="lead">Todas las preguntas con su respuesta correcta y la justificación. Sirve para leer junto con el resumen impreso.</p>
   <div class="filtros">
+    <select id="rk" class="sel-tema"><option value="inicio" ${RF.k === "inicio" ? "selected" : ""}>Preguntas del FORMS</option><option value="simuladas" ${RF.k === "simuladas" ? "selected" : ""}>Preguntas simuladas</option></select>
     <button class="chip" data-b="todos">Todos</button>
-    ${BLOQUES.map(b => `<button class="chip" data-b="${b.id}">${b.n}. ${esc(b.titulo)}</button>`).join("")}
+    ${B.bl.map(b => `<button class="chip" data-b="${b.id}">${esc(titB(b))}</button>`).join("")}
     <input class="buscar" id="bus" placeholder="Buscar (ej.: MIME, puerto, IPsec)…" value="${esc(RF.t)}">
   </div>
   <div class="rev" id="rlist"></div>`;
   app.querySelectorAll(".chip").forEach(c => c.onclick = () => { RF.b = c.dataset.b; pintarRepaso(); });
   $("#bus").oninput = e => { RF.t = e.target.value; pintarRepaso(); };
+  $("#rk").onchange = e => { RF.k = e.target.value; RF.b = "todos"; vRepaso(); };
   pintarRepaso();
 }
 function pintarRepaso() {
   app.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c.dataset.b === RF.b));
   const t = RF.t.trim().toLowerCase();
-  const ps = PREGUNTAS.filter(p => (RF.b === "todos" || p.b === RF.b) &&
+  const ps = BANCOS[RF.k].ps.filter(p => (RF.b === "todos" || p.b === RF.b) &&
     (!t || (p.q + " " + p.o.join(" ") + " " + p.why).toLowerCase().includes(t)));
   $("#rlist").innerHTML = ps.length ? ps.map(p => revItem({ p, sel: p.c, ok: true })
     .replace(/<b style="color:var\(--ok\)">✓ Correcta<\/b>/, "").replace(/ ✓<\/li>/g, "</li>")).join("")
@@ -504,23 +566,29 @@ function pintarRepaso() {
 }
 
 // ---------- ESTADÍSTICAS ----------
-function vStats() {
-  const filas = BLOQUES.map(b => {
-    const ps = PREGUNTAS.filter(p => p.b === b.id);
+function tablaStats(PS, BL) {
+  const filas = BL.map(b => {
+    const ps = PS.filter(p => p.b === b.id);
     const a = ps.reduce((s, p) => s + (DB.st[p.id] ? DB.st[p.id].a : 0), 0);
     const ok = ps.reduce((s, p) => s + (DB.st[p.id] ? DB.st[p.id].ok : 0), 0);
     const vistas = ps.filter(p => DB.st[p.id]).length;
-    return { t: `${b.n}. ${b.titulo}`, n: ps.length, vistas, a, ok };
+    return { t: etqB(b), n: ps.length, vistas, a, ok };
   });
   const T = filas.reduce((s, f) => ({ t: "Total", n: s.n + f.n, vistas: s.vistas + f.vistas, a: s.a + f.a, ok: s.ok + f.ok }), { n: 0, vistas: 0, a: 0, ok: 0 });
   const pc = f => f.a ? Math.round(100 * f.ok / f.a) + "%" : "–";
+  return `<table class="st">
+    <tr><th>Bloque</th><th>Preguntas</th><th>Vistas</th><th>Intentos</th><th>Aciertos</th></tr>
+    ${filas.concat(T).map(f => `<tr><td>${esc(f.t)}</td><td>${f.n}</td><td>${f.vistas}</td><td>${f.a}</td><td>${pc(f)}</td></tr>`).join("")}
+  </table>`;
+}
+function vStats() {
   app.innerHTML = `
   <h1 class="tit">Estadísticas</h1>
   <p class="lead">Se guardan en este navegador. “Aciertos” cuenta todos los intentos.</p>
-  <table class="st">
-    <tr><th>Bloque</th><th>Preguntas</th><th>Vistas</th><th>Intentos</th><th>Aciertos</th></tr>
-    ${filas.concat(T).map(f => `<tr><td>${esc(f.t)}</td><td>${f.n}</td><td>${f.vistas}</td><td>${f.a}</td><td>${pc(f)}</td></tr>`).join("")}
-  </table>
+  <h2 style="margin:18px 0 8px;color:var(--rojo-osc);font-size:19px">Preguntas del FORMS</h2>
+  ${tablaStats(PREGUNTAS, BLOQUES)}
+  <h2 style="margin:24px 0 8px;color:var(--rojo-osc);font-size:19px">Preguntas simuladas</h2>
+  ${tablaStats(SIMULADAS, BLOQUES_SIM)}
   <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
     <button class="btn sec" id="rst">Borrar estadísticas</button>
   </div>`;
@@ -532,6 +600,7 @@ function vStats() {
 }
 
 // ---------- teclado ----------
+app.addEventListener("click", e => { const im = e.target.closest(".ctx img"); if (im) zoom(im.src); });
 document.addEventListener("keydown", e => {
   if (!Q || !app.querySelector(".qcard") || e.target.tagName === "INPUT") return;
   const it = Q.items[Q.idx];
