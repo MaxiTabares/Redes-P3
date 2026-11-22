@@ -177,6 +177,11 @@ table.st tr:last-child td{border-bottom:0;font-weight:700;background:var(--rojo-
 .tag.k1{background:#fff2d6;color:#8a5a0b}
 .aviso-sim{background:#fff7e6;border:1px solid #f1d39a;border-radius:10px;padding:10px 14px;font-size:14px;margin-top:14px}
 .ritem .ctx{max-width:640px}
+.seg{display:inline-flex;background:var(--rojo-claro);border-radius:999px;padding:4px;gap:4px;margin:0 0 14px;flex-wrap:wrap}
+.seg button{border:0;background:transparent;color:var(--rojo-osc);font-weight:700;padding:9px 18px;border-radius:999px;font-size:15px;cursor:pointer}
+.seg button.on{background:var(--rojo);color:#fff}
+.seg small{opacity:.75;font-weight:600;margin-left:4px}
+.ritem .fb summary{font-size:14px}
 @media (max-width:640px){
   .qcard{padding:18px} .qtext{font-size:17px} h1.tit{font-size:23px} .hwrap{padding:10px 14px} nav button{padding:6px 10px;font-size:14px}
 }
@@ -282,7 +287,7 @@ function vInicio() {
     <div class="acc">
       <button class="btn" id="pt">Practicar selección</button>
       ${nf ? `<button class="btn sec" onclick="empezar(falladas(),'Repaso de errores','prac')">Repasar errores (${nf})</button>` : ""}
-      ${S ? `<button class="btn sec" onclick="simulacro(20,'simuladas')">Simulacro de 20</button>` : `<button class="btn sec" onclick="ir('simulacro')">Simulacro de parcial</button>`}
+      ${S ? `<button class="btn sec" onclick="simulacro(20,'simuladas')">Simulacro de 20</button><button class="btn sec" onclick="RF.k='simuladas';RF.b='todos';RF.f='';ir('repaso')">Ver todas con respuestas</button>` : `<button class="btn sec" onclick="ir('simulacro')">Simulacro de parcial</button>`}
       ${tema === "todos" ? `<button class="btn sec" id="rb">Rearmar bloques</button>` : ""}
     </div>
     <div class="opts">
@@ -525,44 +530,57 @@ function revItem(x) {
     return `<li class="${c ? "c" : "x"}">${esc(o)}${c && s ? " ✓" : c ? " (correcta)" : " (tu respuesta)"}</li>`;
   }).join("");
   return `<div class="card ritem ${x.ok ? "ok" : "no"}">
-    <span class="tag">${esc(etqB(b))}</span> <b style="color:${x.ok ? "var(--ok)" : "var(--mal)"}">${x.ok ? "✓ Correcta" : "✕ Incorrecta"}</b>
+    <span class="tag">${esc(etqB(b))}</span>${p.cat === "Parcial otra comisión" ? ` <span class="tag k1">Parcial 4K1</span>` : ""} <b style="color:${x.ok ? "var(--ok)" : "var(--mal)"}">${x.ok ? "✓ Correcta" : "✕ Incorrecta"}</b>
     ${p.ctx >= 0 ? ctxHTML(p) : ""}
     <div class="rq">${esc(p.q)}</div>
     ${p.img ? `<img src="${IMGS[p.img]}" alt="" onclick="zoom(this.src)" style="max-width:420px;cursor:zoom-in">` : ""}
     <ul>${li}</ul>
     <div class="why">${esc(p.why)}</div>
+    ${p.pasos && p.pasos.length ? `<div class="fb" style="margin-top:8px;padding:0;border:0;background:none">${pasosHTML(p)}</div>` : ""}
     ${p.nota ? `<div class="nota"><b>Ojo:</b> ${esc(p.nota)}</div>` : ""}
     <div class="src">📖 ${esc(fuente(p))}</div>
   </div>`;
 }
 
 // ---------- REPASO ----------
-let RF = { b: "todos", t: "", k: "inicio" };
+let RF = { b: "todos", t: "", k: "inicio", f: "" };
 function vRepaso() {
   const B = BANCOS[RF.k];
   app.innerHTML = `
   <h1 class="tit">Repaso</h1>
-  <p class="lead">Todas las preguntas con su respuesta correcta y la justificación. Sirve para leer junto con el resumen impreso.</p>
+  <p class="lead">Todas las preguntas con su respuesta correcta y la justificación${RF.k === "simuladas" ? ", con sus tablas, gráficos y el paso a paso" : ". Sirve para leer junto con el resumen impreso"}.</p>
+  <div class="seg">
+    <button data-k="inicio" class="${RF.k === "inicio" ? "on" : ""}">Preguntas del FORMS <small>${PREGUNTAS.length}</small></button>
+    <button data-k="simuladas" class="${RF.k === "simuladas" ? "on" : ""}">Preguntas simuladas <small>${SIMULADAS.length}</small></button>
+  </div>
+  ${RF.k === "simuladas" ? `<div class="filtros">
+    <button class="chip f" data-f="">Todas</button>
+    <button class="chip f" data-f="k1">Solo las del parcial 4K1 (${SIMULADAS.filter(p => p.cat === "Parcial otra comisión").length})</button>
+    <button class="chip f" data-f="ctx">Solo con imagen o tabla (${SIMULADAS.filter(p => p.ctx >= 0).length})</button>
+  </div>` : ""}
   <div class="filtros">
-    <select id="rk" class="sel-tema"><option value="inicio" ${RF.k === "inicio" ? "selected" : ""}>Preguntas del FORMS</option><option value="simuladas" ${RF.k === "simuladas" ? "selected" : ""}>Preguntas simuladas</option></select>
     <button class="chip" data-b="todos">Todos</button>
     ${B.bl.map(b => `<button class="chip" data-b="${b.id}">${esc(titB(b))}</button>`).join("")}
     <input class="buscar" id="bus" placeholder="Buscar (ej.: MIME, puerto, IPsec)…" value="${esc(RF.t)}">
   </div>
   <div class="rev" id="rlist"></div>`;
-  app.querySelectorAll(".chip").forEach(c => c.onclick = () => { RF.b = c.dataset.b; pintarRepaso(); });
+  app.querySelectorAll(".chip[data-b]").forEach(c => c.onclick = () => { RF.b = c.dataset.b; pintarRepaso(); });
+  app.querySelectorAll(".chip[data-f]").forEach(c => c.onclick = () => { RF.f = c.dataset.f; pintarRepaso(); });
+  app.querySelectorAll(".seg button").forEach(c => c.onclick = () => { RF.k = c.dataset.k; RF.b = "todos"; RF.f = ""; vRepaso(); });
   $("#bus").oninput = e => { RF.t = e.target.value; pintarRepaso(); };
-  $("#rk").onchange = e => { RF.k = e.target.value; RF.b = "todos"; vRepaso(); };
   pintarRepaso();
 }
 function pintarRepaso() {
-  app.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c.dataset.b === RF.b));
+  app.querySelectorAll(".chip[data-b]").forEach(c => c.classList.toggle("on", c.dataset.b === RF.b));
+  app.querySelectorAll(".chip[data-f]").forEach(c => c.classList.toggle("on", c.dataset.f === RF.f));
   const t = RF.t.trim().toLowerCase();
   const ps = BANCOS[RF.k].ps.filter(p => (RF.b === "todos" || p.b === RF.b) &&
+    (RF.k !== "simuladas" || !RF.f || (RF.f === "k1" ? p.cat === "Parcial otra comisión" : p.ctx >= 0)) &&
     (!t || (p.q + " " + p.o.join(" ") + " " + p.why).toLowerCase().includes(t)));
   $("#rlist").innerHTML = ps.length ? ps.map(p => revItem({ p, sel: p.c, ok: true })
     .replace(/<b style="color:var\(--ok\)">✓ Correcta<\/b>/, "").replace(/ ✓<\/li>/g, "</li>")).join("")
     : `<p class="lead">No hay preguntas que coincidan.</p>`;
+  $("#rlist").insertAdjacentHTML("afterbegin", `<p class="hint" style="margin:0">${ps.length} preguntas</p>`);
 }
 
 // ---------- ESTADÍSTICAS ----------
