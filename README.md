@@ -7,5 +7,5 @@ Cuestionario interactivo para practicar el tercer parcial de Redes de Datos.
 
 ## Parcial 1 (`/p1`)
 
-- `p1/index.html`: simulador del Parcial 1 (221 preguntas en 10 temas, teóricas y prácticas), servido en `/p1/`.
+- `p1/index.html`: simulador del Parcial 1 (318 preguntas en 10 temas, teóricas y prácticas, con chip 4K1), servido en `/p1/`.
 - `p1/fuente/`: banco (`preguntas.js`), interfaz (`app.html`) e imágenes. Para regenerar: `cd p1/fuente && python3 build.py`.
