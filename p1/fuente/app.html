@@ -195,6 +195,9 @@ table.st tr:last-child td{border-bottom:0;font-weight:700;background:var(--rojo-
 .seg button{border:0;background:transparent;color:var(--rojo-osc);font-weight:700;padding:9px 18px;border-radius:999px;font-size:15px;cursor:pointer}
 .seg button.on{background:var(--rojo);color:#fff}
 .seg small{opacity:.75;font-weight:600;margin-left:4px}
+.tag.pr{background:#e8f1ff;color:#1a4fa0}
+.sec-t{margin:26px 0 4px;color:var(--rojo-osc);font-size:19px}
+.sec-s{margin:0 0 12px;color:var(--gris);font-size:14px}
 .ritem .fb summary{font-size:14px}
 @media (max-width:640px){
   .qcard{padding:18px} .qtext{font-size:17px} h1.tit{font-size:23px} .hwrap{padding:10px 14px} nav button{padding:6px 10px;font-size:14px}
@@ -213,7 +216,7 @@ table.st tr:last-child td{border-bottom:0;font-weight:700;background:var(--rojo-
   </nav>
 </div></header>
 <main id="app"></main>
-<footer>Preguntas del Moodle del 1er parcial teórico 4K4, de la revisión en clase del 1er parcial y del preguntero del zip · Alcance: filminas 1-01 a 1-11 · El bloque Extra (IPv6/ARP/DHCP/ICMP) seguramente no entra</footer>
+<footer>Preguntas del preguntero web del 1er parcial (197, con sus 10 temas), más las del Moodle 4K4, la revisión en clase, el preguntero del zip y el 4K1 · Alcance: filminas 1-01 a 1-11</footer>
 <div class="zoom" id="zoom" onclick="this.classList.remove('on')"><img id="zoomimg" alt=""></div>
 
 <script>
@@ -226,12 +229,12 @@ const $ = s => document.querySelector(s);
 const app = $("#app");
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const hash = s => { let h = 5381; for (const ch of s) h = ((h << 5) + h + ch.charCodeAt(0)) | 0; return (h >>> 0).toString(36); };
-PREGUNTAS.forEach((p, i) => { p.id = hash(p.b + "|" + p.q + "|" + p.o.join("|")); p.i = i; });
+PREGUNTAS.forEach((p, i) => { p.id = hash(p.q + "|" + p.o.join("|")); p.i = i; });
 SIMULADAS.forEach((p, i) => { p.id = "s" + hash(p.q + "|" + p.o.join("|")); p.i = i; p.sim = true; });
 const bloque = id => BLOQUES.find(b => b.id === id) || BLOQUES_SIM.find(b => b.id === id);
 // Dos bancos: "inicio" = FORMS; "simuladas" = Simulacro dirigido (facu-estudio)
 const BANCOS = {
-  inicio: { ps: PREGUNTAS, bl: BLOQUES, kT: "tema", kS: "seed", corto: { u1: "Arquitectura/Internet", u2: "Acceso/Dispositivos/WLAN", u3: "IPv4/Subredes/VLAN", x: "Extra IPv6/ARP/DHCP" } },
+  inicio: { ps: PREGUNTAS, bl: BLOQUES, kT: "tema", kS: "seed" },
   simuladas: { ps: SIMULADAS, bl: BLOQUES_SIM, kT: "temaS", kS: "seedS" }
 };
 let VISTA = "inicio";
@@ -265,11 +268,15 @@ document.querySelectorAll("#nav button").forEach(b => b.onclick = () => ir(b.dat
 const N_BLOQUES = 4;
 if (!DB.seed) { DB.seed = Math.floor(Math.random() * 1e9) + 1; }
 if (!DB.seedS) { DB.seedS = Math.floor(Math.random() * 1e9) + 1; }
-DB.tema = DB.tema || "todos"; DB.temaS = DB.temaS || "todos"; DB.estado = DB.estado || "todas";
+DB.tema = DB.tema || "todos"; DB.temaS = DB.temaS || "todos"; DB.estado = DB.estado || "todas"; DB.tipo = DB.tipo || "todas";
+if (DB.tema !== "todos" && !BLOQUES.some(b => b.id === DB.tema)) DB.tema = "todos";
+const TIPOS = [["todas", "Todas"], ["teo", "Teóricas"], ["prac", "Prácticas"]];
+const filtrarTipo = (ps, t) => { t = t || DB.tipo; return VISTA === "simuladas" || t === "todas" ? ps : ps.filter(p => t === "prac" ? p.pr : !p.pr); };
+const ETQ_TIPO = { todas: "", teo: " · teóricas", prac: " · prácticas" };
 function rng(seed) { let s = seed >>> 0; return () => { s = (s + 0x6D2B79F5) | 0; let t = Math.imul(s ^ (s >>> 15), 1 | s); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 function bloquesAleatorios() {
   const r = rng(DB[banco().kS]);
-  const a = banco().ps.slice().sort((x, y) => x.id < y.id ? -1 : 1);
+  const a = filtrarTipo(banco().ps).slice().sort((x, y) => x.id < y.id ? -1 : 1);
   for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
   const tam = Math.ceil(a.length / N_BLOQUES);
   return Array.from({ length: N_BLOQUES }, (_, k) => a.slice(k * tam, (k + 1) * tam));
@@ -287,12 +294,13 @@ function vInicio() {
     <h1 class="tit" style="margin-top:10px">${S ? "Practicá con preguntas tipo parcial" : "Practicá el Parcial 1 de Redes de Datos"}</h1>
     <p class="lead" style="margin:0">${S
       ? `${SIMULADAS.length} preguntas del “Simulacro dirigido” (facu-estudio), con el formato de lo que tomaron: puertos, tablas NAT/PAT, firewall con colores, nslookup, gráficos. Incluye ${SIMULADAS.filter(p => p.cat === "Parcial otra comisión").length} del parcial del 4K1 (marcadas). Al responder ves la justificación y el paso a paso.`
-      : `${PREGUNTAS.length} preguntas de parciales anteriores del 1er parcial. Elegí un bloque o filtrá por tema; al responder ves si está bien o mal y una justificación corta sacada del resumen o las filminas.`}</p>
+      : `${PREGUNTAS.length} preguntas de parciales anteriores del 1er parcial, divididas en 10 temas y en teóricas y prácticas. Elegí un tema o un bloque mezclado; al responder ves si está bien o mal y la explicación.`}</p>
+    ${S ? "" : `<div class="seg" id="tipos">${TIPOS.map(([k, t]) => `<button data-t="${k}" class="${DB.tipo === k ? "on" : ""}">${t} <small>${filtrarTipo(PREGUNTAS, k).length}</small></button>`).join("")}</div>`}
     ${S ? `<div class="aviso-sim"><b>Ojo:</b> no son las preguntas del FORMS. Están armadas a partir de lo que se tomó y puede que no estén formuladas igual que en el parcial.</div>` : ""}
     <div class="toolbar">
       <select id="tema" class="sel-tema">
-        <option value="todos">Todas las unidades</option>
-        ${B.bl.map(b => `<option value="${b.id}" ${tema === b.id ? "selected" : ""}>${S && b.n !== "+" ? "Unidad " : ""}${b.n === "+" ? "" : b.n + ". "}${esc(b.titulo)}</option>`).join("")}
+        <option value="todos">${S ? "Todas las unidades" : "Todos los temas"}</option>
+        ${B.bl.map(b => { const k = filtrarTipo(B.ps).filter(p => p.b === b.id).length; return `<option value="${b.id}" ${tema === b.id ? "selected" : ""} ${!S && !k ? "disabled" : ""}>${S && b.n !== "+" ? "Unidad " : ""}${b.n === "+" ? "" : b.n + ". "}${esc(b.titulo)}${S ? "" : ` (${k})`}</option>`; }).join("")}
       </select>
       <div class="chips">
         ${[["todas", "Todas"], ["nuevas", "No respondidas"], ["mal", "Incorrectas"]].map(([k, t]) => `<button class="chip ${DB.estado === k ? "on" : ""}" data-e="${k}">${t}</button>`).join("")}
@@ -309,13 +317,14 @@ function vInicio() {
       <label><input type="checkbox" id="mo" ${DB.mezclarOpc ? "checked" : ""}> Mezclar las opciones</label>
     </div>
   </div>
-  <div class="grid">${cardsInicio()}</div>`;
+  ${cardsInicio()}`;
+  app.querySelectorAll("#tipos button").forEach(c => c.onclick = () => { DB.tipo = c.dataset.t; guardar(); vInicio(); });
   $("#tema").onchange = e => { DB[B.kT] = e.target.value; guardar(); vInicio(); };
   app.querySelectorAll(".chip[data-e]").forEach(c => c.onclick = () => { DB.estado = c.dataset.e; guardar(); vInicio(); });
   $("#pt").onclick = () => {
-    const base = tema === "todos" ? B.ps : B.ps.filter(p => p.b === tema);
+    const base = filtrarTipo(tema === "todos" ? B.ps : B.ps.filter(p => p.b === tema));
     const t = (tema === "todos" ? (S ? "Simuladas · todas" : "Todos los temas") : titB(bloque(tema)));
-    lanzar(filtrarEstado(base), t + ETQ_ESTADO[DB.estado]);
+    lanzar(filtrarEstado(base), t + (S ? "" : ETQ_TIPO[DB.tipo]) + ETQ_ESTADO[DB.estado]);
   };
   const rb = $("#rb"); if (rb) rb.onclick = () => { DB[B.kS] = Math.floor(Math.random() * 1e9) + 1; guardar(); vInicio(); };
   $("#mp").onchange = e => { DB.mezclarPreg = e.target.checked; guardar(); };
@@ -323,19 +332,26 @@ function vInicio() {
 }
 const titB = b => (b.n === "+" ? "" : b.n + ". ") + b.titulo;
 function lanzar(ps, titulo) {
-  if (!ps.length) { const g = app.querySelector(".grid"); g.insertAdjacentHTML("beforebegin", `<p class="aviso">No hay preguntas con ese filtro todavía.</p>`); setTimeout(() => { const a = app.querySelector(".aviso"); if (a) a.remove(); }, 2500); return; }
+  if (!ps.length) { const g = app.querySelector(".grid") || app.querySelector(".hero"); g.insertAdjacentHTML("beforebegin", `<p class="aviso">No hay preguntas con ese filtro todavía.</p>`); setTimeout(() => { const a = app.querySelector(".aviso"); if (a) a.remove(); }, 2500); return; }
   empezar(ps, titulo, "prac");
 }
 let CARDS = [];
 function cardsInicio() {
-  const B = banco(), tema = DB[B.kT];
-  if (tema === "todos") {
-    CARDS = bloquesAleatorios().map((ps, k) => ({ n: k + 1, titulo: `Bloque ${k + 1}`, sub: VISTA === "simuladas" ? "Mezcla de todas las unidades" : "Mezcla de todos los temas", ps }));
-  } else {
-    const b = bloque(tema);
-    CARDS = [{ n: b.n, titulo: b.titulo, sub: b.sub, ps: B.ps.filter(p => p.b === b.id) }];
+  const B = banco(), tema = DB[B.kT], S = VISTA === "simuladas";
+  const mezcla = () => bloquesAleatorios().filter(ps => ps.length).map((ps, k) => ({ n: k + 1, titulo: `Bloque ${k + 1}`, mix: true, sub: S ? "Mezcla de todas las unidades" : "Mezcla de todos los temas", ps }));
+  if (S) {
+    CARDS = tema === "todos" ? mezcla() : [(b => ({ n: b.n, titulo: b.titulo, sub: b.sub, ps: B.ps.filter(p => p.b === b.id) }))(bloque(tema))];
+    return `<div class="grid">${CARDS.map((c, i) => cardBloque(c, i)).join("")}</div>`;
   }
-  return CARDS.map((c, i) => cardBloque(c, i)).join("");
+  const porTema = B.bl.filter(b => tema === "todos" || b.id === tema)
+    .map(b => ({ n: b.n, titulo: b.titulo, sub: b.sub, ps: filtrarTipo(B.ps).filter(p => p.b === b.id) })).filter(c => c.ps.length);
+  CARDS = porTema.concat(tema === "todos" ? mezcla() : []);
+  const nT = porTema.length;
+  const etq = { todas: "todas las preguntas", teo: "solo teóricas", prac: "solo prácticas" }[DB.tipo];
+  return `<h2 class="sec-t">Por tema</h2><p class="sec-s">${etq}</p>
+    <div class="grid">${porTema.map((c, i) => cardBloque(c, i)).join("")}</div>
+    ${tema === "todos" ? `<h2 class="sec-t">Bloques mezclados</h2><p class="sec-s">Las mismas preguntas repartidas al azar en ${N_BLOQUES} bloques (${etq})</p>
+    <div class="grid">${CARDS.slice(nT).map((c, i) => cardBloque(c, nT + i)).join("")}</div>` : ""}`;
 }
 function cardBloque(c, i) {
   const ps = c.ps;
@@ -354,14 +370,14 @@ function cardBloque(c, i) {
 }
 function practicarCard(i) {
   const c = CARDS[i];
-  lanzar(filtrarEstado(c.ps), (DB[banco().kT] === "todos" ? c.titulo : titB(c)) + ETQ_ESTADO[DB.estado]);
+  lanzar(filtrarEstado(c.ps), (c.mix ? c.titulo : titB(c)) + (VISTA === "simuladas" ? "" : ETQ_TIPO[DB.tipo]) + ETQ_ESTADO[DB.estado]);
 }
 
 // ---------- SIMULACRO ----------
 function vSimulacro() {
   app.innerHTML = `
   <h1 class="tit">Simulacro de parcial</h1>
-  <p class="lead">Preguntas al azar de todos los bloques, repartidas en proporción. No ves las respuestas hasta terminar, como en el parcial. Al final tenés la nota sobre 10 y la corrección de cada pregunta.</p>
+  <p class="lead">Preguntas al azar de todos los temas (teóricas y prácticas), repartidas en proporción. No ves las respuestas hasta terminar, como en el parcial. Al final tenés la nota sobre 10 y la corrección de cada pregunta.</p>
   <div class="grid">
     ${[10, 20, 30].map(n => `<div class="card bloque">
       <div style="display:flex;gap:12px;align-items:center"><div class="num">${n}</div><div><h3>${n} preguntas</h3><p>${n === 10 ? "Rápido, unos 10 minutos" : n === 20 ? "Formato tipo parcial" : "Repaso largo"}</p></div></div>
@@ -396,15 +412,17 @@ function empezar(lista, titulo, modo, yaMezclado) {
   ir("quiz");
 }
 const esGrid = p => Array.isArray(p.filas);
+const cOk = (c, v) => Array.isArray(c) ? c.includes(v) : v === c;
+const cTxt = (p, c) => Array.isArray(c) ? c.map(i => p.o[i]).join(" o ") : p.o[c];
 const listo = it => esGrid(it.p) ? it.p.filas.every((_, r) => it.sel[r] >= 0) : it.sel.length > 0;
 function gridHTML(it, lock) {
   const p = it.p;
   return `<table class="grid-q">${p.filas.map((f, r) => {
-    const v = it.sel[r] >= 0 ? it.sel[r] : -1, ok = v === p.c[r];
+    const v = it.sel[r] >= 0 ? it.sel[r] : -1, ok = cOk(p.c[r], v);
     const cls = lock ? (ok ? "good" : "bad") : "";
     return `<tr class="${cls}"><td class="gf">${esc(f)}</td><td><select data-r="${r}" ${lock ? "disabled" : ""}>
       <option value="-1">Elegir…</option>${p.o.map((o, i) => `<option value="${i}" ${v === i ? "selected" : ""}>${esc(o)}</option>`).join("")}
-    </select>${lock && !ok ? ` <span class="gc">→ ${esc(p.o[p.c[r]])}</span>` : ""}</td></tr>`;
+    </select>${lock && !ok ? ` <span class="gc">→ ${esc(cTxt(p, p.c[r]))}</span>` : ""}</td></tr>`;
   }).join("")}</table>`;
 }
 function ordenOpc(p) {
@@ -440,7 +458,7 @@ function vQuiz() {
   </div>
   <div class="bar"><i style="width:${100 * (Q.idx + (lock ? 1 : 0)) / n}%"></i></div>
   <div class="card qcard">
-    <div style="margin-bottom:8px"><span class="tag">${esc(etqB(b))}</span>${p.cat === "Parcial otra comisión" ? ` <span class="tag k1">Parcial 4K1</span>` : ""}</div>
+    <div style="margin-bottom:8px"><span class="tag">${esc(etqB(b))}</span>${p.pr ? ` <span class="tag pr">Práctica</span>` : ""}${p.cat === "Parcial otra comisión" ? ` <span class="tag k1">Parcial 4K1</span>` : ""}</div>
     ${ctxHTML(p)}
     <p class="qtext">${esc(p.q)}</p>
     <div class="hint">${esGrid(p) ? "Elegí la opción correcta para cada fila" : multi ? `Seleccioná ${p.c.length} opciones` : "Seleccioná una opción"}</div>
@@ -489,7 +507,7 @@ function elegir(oi) {
   else it.sel = [oi];
   vQuiz();
 }
-const esOk = it => esGrid(it.p) ? it.p.c.every((c, r) => it.sel[r] === c)
+const esOk = it => esGrid(it.p) ? it.p.c.every((c, r) => cOk(c, it.sel[r]))
   : it.sel.length === it.p.c.length && it.p.c.every(c => it.sel.includes(c));
 function responder() {
   const it = Q.items[Q.idx];
@@ -502,7 +520,7 @@ function responder() {
 }
 function feedback(it) {
   const p = it.p;
-  const corr = esGrid(p) ? p.filas.map((f, r) => `${esc(f)} → ${esc(p.o[p.c[r]])}`).join(" · ") : p.c.map(i => esc(p.o[i])).join(" · ");
+  const corr = esGrid(p) ? p.filas.map((f, r) => `${esc(f)} → ${esc(cTxt(p, p.c[r]))}`).join(" · ") : p.c.map(i => esc(p.o[i])).join(" · ");
   return `<div class="fb ${it.ok ? "ok" : "no"}">
     <h4>${it.ok ? "✓ ¡Correcto!" : "✕ Incorrecto"}</h4>
     ${it.ok ? "" : `<p class="ans"><b>Respuesta correcta:</b> ${corr}</p>`}
@@ -556,15 +574,15 @@ function revItem(x) {
   const p = x.p, b = bloque(p.b);
   const li = esGrid(p) ? p.filas.map((f, r) => {
     const s = x.sel[r], c = p.c[r];
-    return s === c ? `<li class="c">${esc(f)} → ${esc(p.o[c])}</li>`
-      : `<li class="c">${esc(f)} → ${esc(p.o[c])} (correcta)${s >= 0 ? ` <span style="color:var(--mal);text-decoration:line-through">${esc(p.o[s])}</span>` : ""}</li>`;
+    return (s === c || cOk(c, s)) ? `<li class="c">${esc(f)} → ${esc(Array.isArray(c) && s >= 0 ? p.o[s] : cTxt(p, c))}</li>`
+      : `<li class="c">${esc(f)} → ${esc(cTxt(p, c))} (correcta)${s >= 0 ? ` <span style="color:var(--mal);text-decoration:line-through">${esc(p.o[s])}</span>` : ""}</li>`;
   }).join("") : p.o.map((o, i) => {
     const c = p.c.includes(i), s = x.sel.includes(i);
     if (!c && !s) return "";
     return `<li class="${c ? "c" : "x"}">${esc(o)}${c && s ? " ✓" : c ? " (correcta)" : " (tu respuesta)"}</li>`;
   }).join("");
   return `<div class="card ritem ${x.ok ? "ok" : "no"}">
-    <span class="tag">${esc(etqB(b))}</span>${p.cat === "Parcial otra comisión" ? ` <span class="tag k1">Parcial 4K1</span>` : ""} <b style="color:${x.ok ? "var(--ok)" : "var(--mal)"}">${x.ok ? "✓ Correcta" : "✕ Incorrecta"}</b>
+    <span class="tag">${esc(etqB(b))}</span>${p.pr ? ` <span class="tag pr">Práctica</span>` : ""}${p.cat === "Parcial otra comisión" ? ` <span class="tag k1">Parcial 4K1</span>` : ""} <b style="color:${x.ok ? "var(--ok)" : "var(--mal)"}">${x.ok ? "✓ Correcta" : "✕ Incorrecta"}</b>
     ${p.ctx >= 0 ? ctxHTML(p) : ""}
     <div class="rq">${esc(p.q)}</div>
     ${p.img ? `<img src="${IMGS[p.img]}" alt="" onclick="zoom(this.src)" style="max-width:420px;cursor:zoom-in">` : ""}
@@ -577,7 +595,7 @@ function revItem(x) {
 }
 
 // ---------- REPASO ----------
-let RF = { b: "todos", t: "", k: "inicio", f: "" };
+let RF = { b: "todos", t: "", k: "inicio", f: "", p: "todas" };
 function vRepaso() {
   const B = BANCOS[RF.k];
   app.innerHTML = `
@@ -594,11 +612,15 @@ function vRepaso() {
   <div class="filtros">
     <button class="chip" data-b="todos">Todos</button>
     ${B.bl.map(b => `<button class="chip" data-b="${b.id}">${esc(titB(b))}</button>`).join("")}
+  </div>
+  <div class="filtros">
+    ${TIPOS.map(([k, t]) => `<button class="chip" data-p="${k}">${t}</button>`).join("")}
     <input class="buscar" id="bus" placeholder="Buscar (ej.: MIME, puerto, IPsec)…" value="${esc(RF.t)}">
   </div>
   <div class="rev" id="rlist"></div>`;
   app.querySelectorAll(".chip[data-b]").forEach(c => c.onclick = () => { RF.b = c.dataset.b; pintarRepaso(); });
   app.querySelectorAll(".chip[data-f]").forEach(c => c.onclick = () => { RF.f = c.dataset.f; pintarRepaso(); });
+  app.querySelectorAll(".chip[data-p]").forEach(c => c.onclick = () => { RF.p = c.dataset.p; pintarRepaso(); });
   app.querySelectorAll(".seg button").forEach(c => c.onclick = () => { RF.k = c.dataset.k; RF.b = "todos"; RF.f = ""; vRepaso(); });
   $("#bus").oninput = e => { RF.t = e.target.value; pintarRepaso(); };
   pintarRepaso();
@@ -606,8 +628,9 @@ function vRepaso() {
 function pintarRepaso() {
   app.querySelectorAll(".chip[data-b]").forEach(c => c.classList.toggle("on", c.dataset.b === RF.b));
   app.querySelectorAll(".chip[data-f]").forEach(c => c.classList.toggle("on", c.dataset.f === RF.f));
+  app.querySelectorAll(".chip[data-p]").forEach(c => c.classList.toggle("on", c.dataset.p === RF.p));
   const t = RF.t.trim().toLowerCase();
-  const ps = BANCOS[RF.k].ps.filter(p => (RF.b === "todos" || p.b === RF.b) &&
+  const ps = filtrarTipo(BANCOS[RF.k].ps, RF.p).filter(p => (RF.b === "todos" || p.b === RF.b) &&
     (RF.k !== "simuladas" || !RF.f || (RF.f === "k1" ? p.cat === "Parcial otra comisión" : p.ctx >= 0)) &&
     (!t || (p.q + " " + p.o.join(" ") + " " + p.why).toLowerCase().includes(t)));
   $("#rlist").innerHTML = ps.length ? ps.map(p => revItem({ p, sel: p.c, ok: true })
@@ -628,7 +651,7 @@ function tablaStats(PS, BL) {
   const T = filas.reduce((s, f) => ({ t: "Total", n: s.n + f.n, vistas: s.vistas + f.vistas, a: s.a + f.a, ok: s.ok + f.ok }), { n: 0, vistas: 0, a: 0, ok: 0 });
   const pc = f => f.a ? Math.round(100 * f.ok / f.a) + "%" : "–";
   return `<table class="st">
-    <tr><th>Bloque</th><th>Preguntas</th><th>Vistas</th><th>Intentos</th><th>Aciertos</th></tr>
+    <tr><th>Tema</th><th>Preguntas</th><th>Vistas</th><th>Intentos</th><th>Aciertos</th></tr>
     ${filas.concat(T).map(f => `<tr><td>${esc(f.t)}</td><td>${f.n}</td><td>${f.vistas}</td><td>${f.a}</td><td>${pc(f)}</td></tr>`).join("")}
   </table>`;
 }
@@ -638,6 +661,8 @@ function vStats() {
   <p class="lead">Se guardan en este navegador. “Aciertos” cuenta todos los intentos.</p>
   <h2 style="margin:18px 0 8px;color:var(--rojo-osc);font-size:19px">Preguntas del P1</h2>
   ${tablaStats(PREGUNTAS, BLOQUES)}
+  <h2 style="margin:18px 0 8px;color:var(--rojo-osc);font-size:19px">Teóricas y prácticas</h2>
+  ${tablaStats(PREGUNTAS.map(p => Object.assign({}, p, { b: p.pr ? "prac" : "teo" })), [{ id: "teo", n: "+", titulo: "Teóricas" }, { id: "prac", n: "+", titulo: "Prácticas" }])}
   <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
     <button class="btn sec" id="rst">Borrar estadísticas</button>
   </div>`;
