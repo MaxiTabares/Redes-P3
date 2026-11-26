@@ -40,6 +40,20 @@ h1.tit{font-size:28px;margin:0 0 4px;color:var(--rojo-osc)}
 .tag{display:inline-block;background:var(--rojo-claro);color:var(--rojo-osc);font-weight:700;font-size:12px;padding:3px 10px;border-radius:999px;letter-spacing:.02em}
 .bar{height:8px;background:#f1e3e5;border-radius:99px;overflow:hidden}
 .bar i{display:block;height:100%;background:var(--rojo);border-radius:99px;transition:width .3s}
+/* ---------- mapa de preguntas ---------- */
+.mapa{margin-top:16px;padding:16px 18px}
+.mapa .mh{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;gap:10px;flex-wrap:wrap}
+.mapa .mh b{font-size:15px}
+.mapa .mh span{color:var(--gris);font-size:13px}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:7px}
+.mgrid button{height:36px;border:1px solid #dcdcdf;background:#fff;border-radius:9px;font-size:13px;font-weight:600;color:#55555a;padding:0}
+.mgrid button:hover{border-color:var(--rojo-borde);background:#fff6f7}
+.mgrid button.ok{background:var(--ok-claro);border-color:var(--ok);color:var(--ok)}
+.mgrid button.no{background:var(--mal-claro);border-color:var(--mal);color:var(--mal)}
+.mgrid button.hecha{background:#eef2fb;border-color:#8aa2d6;color:#2f4f9a}
+.mgrid button.act{outline:2.5px solid #1a5fd0;outline-offset:1px;color:#111}
+.mleg{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--gris)}
+.mleg i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px;border:1px solid}
 /* ---------- inicio ---------- */
 .hero{padding:26px;margin-bottom:22px;background:linear-gradient(135deg,#fff 0%,#fff 60%,var(--rojo-claro) 100%);border-left:6px solid var(--rojo)}
 .hero .acc{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
@@ -442,12 +456,32 @@ function vQuiz() {
           ? `<button class="btn" id="go" onclick="sig()">${Q.idx === n - 1 ? "Ver resultados" : "Siguiente →"}</button>`
           : `<button class="btn" id="go" onclick="responder()" ${listo(it) ? "" : "disabled"}>Responder</button>`}
     </div>
-  </div>`;
+  </div>
+  ${mapaHTML()}`;
+  app.querySelectorAll(".mgrid button").forEach(el => el.onclick = () => irA(+el.dataset.i));
   if (!lock || sim) app.querySelectorAll(".opt").forEach(el => el.onclick = () => elegir(+el.dataset.oi));
   if (esGrid(p) && (!lock || sim)) app.querySelectorAll(".grid-q select").forEach(el => el.onchange = () => {
     it.sel[+el.dataset.r] = +el.value; const g = $("#go"); if (g && g.textContent.trim() !== "Ver resultados") g.disabled = !listo(it);
   });
 }
+function mapaHTML() {
+  const sim = Q.modo === "sim";
+  const hechas = Q.items.filter(x => sim ? listo(x) : x.resp).length;
+  const bot = Q.items.map((x, i) => {
+    let c = "";
+    if (!sim && x.resp) c = x.ok ? "ok" : "no";
+    else if (sim && listo(x)) c = "hecha";
+    if (i === Q.idx) c += " act";
+    return `<button class="${c}" data-i="${i}" title="Pregunta ${i + 1}">${i + 1}</button>`;
+  }).join("");
+  const leg = sim
+    ? `<span><i style="background:#eef2fb;border-color:#8aa2d6"></i>Respondida (se corrige al final)</span>`
+    : `<span><i style="background:var(--ok-claro);border-color:var(--ok)"></i>Bien</span><span><i style="background:var(--mal-claro);border-color:var(--mal)"></i>Mal</span>`;
+  return `<div class="card mapa"><div class="mh"><b>Mapa de preguntas</b><span>${hechas}/${Q.items.length} respondidas</span></div>
+    <div class="mgrid">${bot}</div>
+    <div class="mleg">${leg}<span><i style="background:#fff;border-color:#1a5fd0"></i>Actual</span><span><i style="background:#fff;border-color:#dcdcdf"></i>Sin responder</span></div></div>`;
+}
+function irA(i) { Q.idx = i; ir("quiz"); window.scrollTo({ top: 0, behavior: "smooth" }); }
 function elegir(oi) {
   const it = Q.items[Q.idx], multi = it.p.c.length > 1;
   if (it.resp && Q.modo !== "sim") return;
@@ -478,7 +512,7 @@ function feedback(it) {
     <div class="src">${esc(fuente(p))}</div>
   </div>`;
 }
-function sig() { if (Q.idx < Q.items.length - 1) { Q.idx++; ir("quiz"); } else ir("res"); }
+function sig() { if (Q.idx < Q.items.length - 1) { Q.idx++; ir("quiz"); } else { Q.items = Q.items.filter(x => x.resp); ir("res"); } }
 function mover(d) { Q.idx = Math.max(0, Math.min(Q.items.length - 1, Q.idx + d)); ir("quiz"); }
 function simSig() {
   const it = Q.items[Q.idx]; if (!listo(it)) return;
