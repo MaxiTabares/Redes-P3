@@ -196,6 +196,7 @@ table.st tr:last-child td{border-bottom:0;font-weight:700;background:var(--rojo-
 .seg button.on{background:var(--rojo);color:#fff}
 .seg small{opacity:.75;font-weight:600;margin-left:4px}
 .tag.pr{background:#e8f1ff;color:#1a4fa0}
+.tag.ia{background:#efe7fb;color:#5b2d99}
 .sec-t{margin:26px 0 4px;color:var(--rojo-osc);font-size:19px}
 .sec-s{margin:0 0 12px;color:var(--gris);font-size:14px}
 .ritem .fb summary{font-size:14px}
@@ -271,7 +272,7 @@ if (!DB.seedS) { DB.seedS = Math.floor(Math.random() * 1e9) + 1; }
 DB.tema = DB.tema || "todos"; DB.temaS = DB.temaS || "todos"; DB.estado = DB.estado || "todas"; DB.tipo = DB.tipo || "todas";
 if (DB.tema !== "todos" && !BLOQUES.some(b => b.id === DB.tema)) DB.tema = "todos";
 const TIPOS = [["todas", "Todas"], ["teo", "Teóricas"], ["prac", "Prácticas"]];
-const filtrarTipo = (ps, t) => { t = t || DB.tipo; return VISTA === "simuladas" || t === "todas" ? ps : ps.filter(p => t === "k1" ? p.k1 : t === "prac" ? p.pr : !p.pr); };
+const filtrarTipo = (ps, t) => { t = t || DB.tipo; return VISTA === "simuladas" || t === "todas" ? ps : ps.filter(p => t === "k1" ? p.k1 : t === "ia" ? p.ia : t === "sinia" ? !p.ia : t === "prac" ? p.pr : !p.pr); };
 const ETQ_TIPO = { todas: "", teo: " · teóricas", prac: " · prácticas" };
 function rng(seed) { let s = seed >>> 0; return () => { s = (s + 0x6D2B79F5) | 0; let t = Math.imul(s ^ (s >>> 15), 1 | s); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 function bloquesAleatorios() {
@@ -458,7 +459,7 @@ function vQuiz() {
   </div>
   <div class="bar"><i style="width:${100 * (Q.idx + (lock ? 1 : 0)) / n}%"></i></div>
   <div class="card qcard">
-    <div style="margin-bottom:8px"><span class="tag">${esc(etqB(b))}</span>${p.pr ? ` <span class="tag pr">Práctica</span>` : ""}${p.k1 ? ` <span class="tag k1">4K1</span>` : ""}${p.cat === "Parcial otra comisión" ? ` <span class="tag k1">Parcial 4K1</span>` : ""}</div>
+    <div style="margin-bottom:8px"><span class="tag">${esc(etqB(b))}</span>${p.pr ? ` <span class="tag pr">Práctica</span>` : ""}${p.k1 ? ` <span class="tag k1">4K1</span>` : ""}${p.ia ? ` <span class="tag ia">Hecha con IA</span>` : ""}${p.cat === "Parcial otra comisión" ? ` <span class="tag k1">Parcial 4K1</span>` : ""}</div>
     ${ctxHTML(p)}
     <p class="qtext">${esc(p.q)}</p>
     <div class="hint">${esGrid(p) ? "Elegí la opción correcta para cada fila" : multi ? `Seleccioná ${p.c.length} opciones` : "Seleccioná una opción"}</div>
@@ -582,7 +583,7 @@ function revItem(x) {
     return `<li class="${c ? "c" : "x"}">${esc(o)}${c && s ? " ✓" : c ? " (correcta)" : " (tu respuesta)"}</li>`;
   }).join("");
   return `<div class="card ritem ${x.ok ? "ok" : "no"}">
-    <span class="tag">${esc(etqB(b))}</span>${p.pr ? ` <span class="tag pr">Práctica</span>` : ""}${p.k1 ? ` <span class="tag k1">4K1</span>` : ""}${p.cat === "Parcial otra comisión" ? ` <span class="tag k1">Parcial 4K1</span>` : ""} <b style="color:${x.ok ? "var(--ok)" : "var(--mal)"}">${x.ok ? "✓ Correcta" : "✕ Incorrecta"}</b>
+    <span class="tag">${esc(etqB(b))}</span>${p.pr ? ` <span class="tag pr">Práctica</span>` : ""}${p.k1 ? ` <span class="tag k1">4K1</span>` : ""}${p.ia ? ` <span class="tag ia">Hecha con IA</span>` : ""}${p.cat === "Parcial otra comisión" ? ` <span class="tag k1">Parcial 4K1</span>` : ""} <b style="color:${x.ok ? "var(--ok)" : "var(--mal)"}">${x.ok ? "✓ Correcta" : "✕ Incorrecta"}</b>
     ${p.ctx >= 0 ? ctxHTML(p) : ""}
     <div class="rq">${esc(p.q)}</div>
     ${p.img ? `<img src="${IMGS[p.img]}" alt="" onclick="zoom(this.src)" style="max-width:420px;cursor:zoom-in">` : ""}
@@ -614,7 +615,7 @@ function vRepaso() {
     ${B.bl.map(b => `<button class="chip" data-b="${b.id}">${esc(titB(b))}</button>`).join("")}
   </div>
   <div class="filtros">
-    ${TIPOS.concat([["k1", "Solo las del 4K1"]]).map(([k, t]) => `<button class="chip" data-p="${k}">${t}</button>`).join("")}
+    ${TIPOS.concat([["k1", "Solo las del 4K1"], ["ia", "Solo las hechas con IA"], ["sinia", "Sin las de IA"]]).map(([k, t]) => `<button class="chip" data-p="${k}">${t}</button>`).join("")}
     <input class="buscar" id="bus" placeholder="Buscar (ej.: MIME, puerto, IPsec)…" value="${esc(RF.t)}">
   </div>
   <div class="rev" id="rlist"></div>`;
